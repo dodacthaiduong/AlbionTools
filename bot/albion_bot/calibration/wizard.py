@@ -1,13 +1,10 @@
 from __future__ import annotations
 import json
-import sys
 import time
 from pathlib import Path
 
 import click
 from Xlib import display as xdisplay, X
-from Xlib.ext import record
-from Xlib.protocol import rq
 
 from albion_bot.calibration.models import Calibration, Cell, InventoryConfig, Rect, Regions
 from albion_bot.calibration.screen import get_screen_size
@@ -16,45 +13,32 @@ from albion_bot.platform.base import get_platform
 
 
 # ---------------------------------------------------------------------------
-# Mouse click capture via Xlib RECORD extension
+# Mouse click capture via XQueryPointer polling
 # ---------------------------------------------------------------------------
 
 def _wait_for_click() -> tuple[int, int]:
-    """Block until the user clicks the left mouse button; return (x, y)."""
-    local_dpy = xdisplay.Display()
-    record_dpy = xdisplay.Display()
+    """Poll until left mouse button is pressed then released; return (x, y)."""
+    dpy = xdisplay.Display()
+    root = dpy.screen().root
 
-    result: list[tuple[int, int]] = []
+    # Wait for button to be UP first (in case it's held from a previous action)
+    while True:
+        data = root.query_pointer()
+        if not (data.mask & X.Button1Mask):
+            break
+        time.sleep(0.05)
 
-    def handler(reply):
-        data = reply.data
-        while len(data):
-            event, data = rq.EventField(None).parse(data, record_dpy)
-            if event.type == X.ButtonPress and event.detail == 1:
-                result.append((event.root_x, event.root_y))
-
-    ctx = record_dpy.record_create_context(
-        0,
-        [record.AllClients],
-        [{
-            "core_requests": (0, 0),
-            "core_replies": (0, 0),
-            "ext_requests": (0, 0, 0, 0),
-            "ext_replies": (0, 0, 0, 0),
-            "delivered_events": (0, 0),
-            "device_events": (X.ButtonPressMask, X.ButtonPressMask),
-            "errors": (0, 0),
-            "client_started": False,
-            "client_died": False,
-        }],
-    )
-
-    record_dpy.record_enable_context(ctx, handler)
-    record_dpy.record_free_context(ctx)
-
-    local_dpy.close()
-    record_dpy.close()
-    return result[0]
+    # Now wait for button DOWN
+    while True:
+        data = root.query_pointer()
+        if data.mask & X.Button1Mask:
+            x, y = data.root_x, data.root_y
+            # Wait for release before returning
+            while root.query_pointer().mask & X.Button1Mask:
+                time.sleep(0.05)
+            dpy.close()
+            return x, y
+        time.sleep(0.05)
 
 
 def _prompt_click(label: str) -> tuple[int, int]:
