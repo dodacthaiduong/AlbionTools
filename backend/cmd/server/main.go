@@ -95,9 +95,15 @@ func main() {
 	}
 
 	// Serve Angular static files
-	r.Static("/assets", filepath.Join(frontendDist, "assets"))
+	r.StaticFS("/assets", http.Dir(filepath.Join(frontendDist, "assets")))
 	r.StaticFile("/favicon.ico", filepath.Join(frontendDist, "favicon.ico"))
 	r.NoRoute(func(c *gin.Context) {
+		// Try to serve the file directly; fall back to index.html for Angular routing
+		reqPath := filepath.Join(frontendDist, filepath.Clean(c.Request.URL.Path))
+		if info, err := os.Stat(reqPath); err == nil && !info.IsDir() {
+			c.File(reqPath)
+			return
+		}
 		c.File(filepath.Join(frontendDist, "index.html"))
 	})
 
