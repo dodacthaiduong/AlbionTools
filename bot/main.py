@@ -1,5 +1,6 @@
 import click
 from albion_bot.db.connection import get_db, close
+from albion_bot.calibration.wizard import run_wizard, save_calibration
 
 
 @click.group()
@@ -22,9 +23,20 @@ def status():
 
 
 @cli.command()
-def calibrate():
-    """Run the calibration wizard (M1)."""
-    click.echo("Calibration wizard not yet implemented.")
+@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
+@click.option("--backup-dir", default=".", show_default=True, help="Directory for JSON backup.")
+def calibrate(profile: str, backup_dir: str):
+    """Run the calibration wizard."""
+    try:
+        cal = run_wizard(profile_name=profile)
+        inserted_id = save_calibration(cal, backup_dir=backup_dir)
+        click.echo(f"\nCalibration saved. MongoDB id: {inserted_id}")
+        click.echo(f"JSON backup: {backup_dir}/calibration_{profile}.json")
+    except Exception as e:
+        click.echo(f"Calibration failed: {e}", err=True)
+        raise SystemExit(1)
+    finally:
+        close()
 
 
 @cli.command()
