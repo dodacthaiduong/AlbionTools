@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +24,22 @@ func main() {
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("lan", false)
 	viper.AutomaticEnv()
+
+	// Resolve frontend dist path relative to project root (one level up from backend/)
+	exe, _ := os.Executable()
+	// When using `go run`, exe is in a temp dir; fall back to source-relative path
+	projectRoot := filepath.Join(filepath.Dir(exe), "..")
+	frontendDist := filepath.Join(projectRoot, "frontend", "dist", "albion-dashboard", "browser")
+	// Check if that path exists; if not, try relative to cwd (for `go run` from project root)
+	if _, err := os.Stat(frontendDist); err != nil {
+		cwd, _ := os.Getwd()
+		frontendDist = filepath.Join(cwd, "..", "frontend", "dist", "albion-dashboard", "browser")
+		if _, err := os.Stat(frontendDist); err != nil {
+			// Last resort: relative to cwd (running from project root)
+			frontendDist = filepath.Join(cwd, "frontend", "dist", "albion-dashboard", "browser")
+		}
+	}
+	log.Printf("serving frontend from: %s", frontendDist)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -77,10 +95,10 @@ func main() {
 	}
 
 	// Serve Angular static files
-	r.Static("/assets", "./frontend/dist/albion-dashboard/browser/assets")
-	r.StaticFile("/favicon.ico", "./frontend/dist/albion-dashboard/browser/favicon.ico")
+	r.Static("/assets", filepath.Join(frontendDist, "assets"))
+	r.StaticFile("/favicon.ico", filepath.Join(frontendDist, "favicon.ico"))
 	r.NoRoute(func(c *gin.Context) {
-		c.File("./frontend/dist/albion-dashboard/browser/index.html")
+		c.File(filepath.Join(frontendDist, "index.html"))
 	})
 
 	addr := "localhost:" + viper.GetString("port")
