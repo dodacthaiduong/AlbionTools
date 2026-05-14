@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/csv"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/durond/albion-auto-seller/internal/db"
+	"github.com/durond/albion-auto-seller/internal/models"
 )
 
 type Handler struct {
@@ -109,6 +111,75 @@ func (h *Handler) BotStatus(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, session)
+}
+
+// GET /api/calibration/profiles
+func (h *Handler) ListCalibrationProfiles(c *gin.Context) {
+	profiles, err := h.repo.ListCalibrationProfiles(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": profiles})
+}
+
+// POST /api/calibration/save
+func (h *Handler) SaveCalibration(c *gin.Context) {
+	var doc models.CalibrationDoc
+	if err := c.ShouldBindJSON(&doc); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.repo.SaveCalibration(c.Request.Context(), doc)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id})
+}
+
+// POST /api/calibration/capture-click
+// Returns a command ID; frontend polls GET /api/calibration/capture-click/:id
+func (h *Handler) StartCaptureClick(c *gin.Context) {
+	id, err := h.repo.CreateCaptureCommand(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id})
+}
+
+// GET /api/calibration/capture-click/:id
+func (h *Handler) PollCaptureClick(c *gin.Context) {
+	id := c.Param("id")
+	x, y, done, err := h.repo.PollCaptureCommand(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if !done {
+		c.JSON(http.StatusOK, gin.H{"done": false})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"done": true, "x": x, "y": y})
+}
+
+// GET /api/calibration/screenshot?x=&y=&w=&h=
+func (h *Handler) Screenshot(c *gin.Context) {
+	x := c.DefaultQuery("x", "0")
+	y := c.DefaultQuery("y", "0")
+	w := c.DefaultQuery("w", "200")
+	hh := c.DefaultQuery("h", "100")
+
+	// Call Python screenshot helper as subprocess
+	cmd := exec.Command("uv", "run", "--project", "./bot", "python",
+		"./bot/albion_bot/calibration/screenshot_helper.py", x, y, w, hh)
+	out, err := cmd.Output()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "screenshot failed: " + err.Error()})
+		return
+	}
+	c.Data(http.StatusOK, "image/png", out)
 }
 
 // GET /api/inventory

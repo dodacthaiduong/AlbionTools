@@ -4,7 +4,8 @@
     "TRANSACTIONS": "Transactions",
     "INVENTORY": "Inventory",
     "CONFIG": "Config",
-    "BOT_STATUS": "Bot Status"
+    "BOT_STATUS": "Bot Status",
+    "CALIBRATION": "Calibration"
   },
   "DASHBOARD": {
     "TITLE": "Dashboard",
@@ -56,6 +57,37 @@
     "RUNNING": "Running",
     "PAUSED": "Paused",
     "STOPPED": "Stopped"
+  },
+  "CALIBRATION": {
+    "TITLE": "Calibration",
+    "SUBTITLE": "Set up screen regions for the bot. Make sure Albion Online is open.",
+    "PROFILE": "Profile name",
+    "GRID_ROWS": "Inventory rows",
+    "GRID_COLS": "Inventory columns",
+    "STEP_GRID": "Grid Layout",
+    "STEP_FIRST_CELL": "First Inventory Cell",
+    "STEP_LAST_CELL": "Last Inventory Cell",
+    "STEP_REGIONS": "UI Regions",
+    "STEP_REVIEW": "Review & Save",
+    "CAPTURE_BTN": "Click to capture",
+    "RECAPTURE_BTN": "Re-capture",
+    "CAPTURED": "Captured",
+    "WAITING": "Waiting for click...",
+    "WIDTH": "Width (px)",
+    "HEIGHT": "Height (px)",
+    "NEXT": "Next",
+    "BACK": "Back",
+    "SAVE": "Save Calibration",
+    "SAVED": "Calibration saved!",
+    "SELL_NOW_BUTTON": "Sell Now button",
+    "BUY_ORDER_PRICE": "Buy order price area",
+    "TOOLTIP_ITEM_NAME": "Item name in tooltip",
+    "TOOLTIP_EST_PRICE": "Estimated price in tooltip",
+    "DISCONNECT_ICON": "Disconnect icon",
+    "POPUP_CLOSE": "Popup close button",
+    "SORT_BUTTON": "Sort button",
+    "STACK_BUTTON": "Stack button",
+    "EMPTY_SLOT_SAMPLE": "Empty slot sample"
   },
   "LANG": {
     "EN": "EN",

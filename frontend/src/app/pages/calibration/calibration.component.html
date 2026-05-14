@@ -1,0 +1,114 @@
+<div class="page-container">
+  <h2>{{ 'CALIBRATION.TITLE' | translate }}</h2>
+  <p style="color:#9e9e9e">{{ 'CALIBRATION.SUBTITLE' | translate }}</p>
+
+  <mat-stepper orientation="vertical" [linear]="false" style="margin-top:24px;background:transparent">
+
+    <!-- Step 1: Grid layout -->
+    <mat-step [label]="'CALIBRATION.STEP_GRID' | translate">
+      <div style="padding:16px 0">
+        <mat-form-field appearance="outline" style="margin-right:16px">
+          <mat-label>{{ 'CALIBRATION.PROFILE' | translate }}</mat-label>
+          <input matInput [(ngModel)]="profileName">
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="margin-right:16px;width:120px">
+          <mat-label>{{ 'CALIBRATION.GRID_ROWS' | translate }}</mat-label>
+          <input matInput type="number" [(ngModel)]="rows" min="1">
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:120px">
+          <mat-label>{{ 'CALIBRATION.GRID_COLS' | translate }}</mat-label>
+          <input matInput type="number" [(ngModel)]="cols" min="1">
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" matStepperNext>{{ 'CALIBRATION.NEXT' | translate }}</button>
+    </mat-step>
+
+    <!-- Step 2: First inventory cell -->
+    <mat-step [label]="'CALIBRATION.STEP_FIRST_CELL' | translate">
+      <div style="padding:16px 0">
+        <ng-container *ngTemplateOutlet="captureBlock; context: { region: firstCell, labelKey: 'CALIBRATION.STEP_FIRST_CELL' }"></ng-container>
+      </div>
+      <button mat-button matStepperPrevious>{{ 'CALIBRATION.BACK' | translate }}</button>
+      <button mat-raised-button color="primary" matStepperNext style="margin-left:8px">{{ 'CALIBRATION.NEXT' | translate }}</button>
+    </mat-step>
+
+    <!-- Step 3: Last inventory cell -->
+    <mat-step [label]="'CALIBRATION.STEP_LAST_CELL' | translate">
+      <div style="padding:16px 0">
+        <ng-container *ngTemplateOutlet="captureBlock; context: { region: lastCell, labelKey: 'CALIBRATION.STEP_LAST_CELL' }"></ng-container>
+      </div>
+      <button mat-button matStepperPrevious>{{ 'CALIBRATION.BACK' | translate }}</button>
+      <button mat-raised-button color="primary" matStepperNext style="margin-left:8px">{{ 'CALIBRATION.NEXT' | translate }}</button>
+    </mat-step>
+
+    <!-- Step 4: UI regions -->
+    <mat-step [label]="'CALIBRATION.STEP_REGIONS' | translate">
+      <div style="padding:16px 0">
+        @for (key of regionKeys; track key) {
+          <div style="margin-bottom:24px;border-bottom:1px solid #333;padding-bottom:16px">
+            <h4 style="margin:0 0 8px;color:#80cbc4">{{ 'CALIBRATION.' + key.toUpperCase() | translate }}</h4>
+            <ng-container *ngTemplateOutlet="captureBlock; context: { region: regions[key], labelKey: 'CALIBRATION.' + key.toUpperCase() }"></ng-container>
+          </div>
+        }
+      </div>
+      <button mat-button matStepperPrevious>{{ 'CALIBRATION.BACK' | translate }}</button>
+      <button mat-raised-button color="primary" matStepperNext style="margin-left:8px">{{ 'CALIBRATION.NEXT' | translate }}</button>
+    </mat-step>
+
+    <!-- Step 5: Review & Save -->
+    <mat-step [label]="'CALIBRATION.STEP_REVIEW' | translate">
+      <div style="padding:16px 0">
+        <p>Profile: <strong>{{ profileName }}</strong></p>
+        <p>Grid: <strong>{{ rows }} × {{ cols }}</strong></p>
+        <p>First cell: <strong>({{ firstCell.rect.x }}, {{ firstCell.rect.y }})</strong></p>
+        <p>Last cell: <strong>({{ lastCell.rect.x }}, {{ lastCell.rect.y }})</strong></p>
+        @for (key of regionKeys; track key) {
+          <p>{{ key }}: <strong>({{ regions[key].rect.x }}, {{ regions[key].rect.y }}) {{ regions[key].rect.w }}×{{ regions[key].rect.h }}</strong></p>
+        }
+        @if (saved) {
+          <p style="color:#80cbc4;font-weight:700">{{ 'CALIBRATION.SAVED' | translate }}</p>
+        }
+      </div>
+      <button mat-button matStepperPrevious>{{ 'CALIBRATION.BACK' | translate }}</button>
+      <button mat-raised-button color="accent" (click)="save()" style="margin-left:8px">{{ 'CALIBRATION.SAVE' | translate }}</button>
+    </mat-step>
+
+  </mat-stepper>
+</div>
+
+<!-- Reusable capture block template -->
+<ng-template #captureBlock let-region="region" let-labelKey="labelKey">
+  <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+    <div>
+      @if (region.capturing) {
+        <div style="display:flex;align-items:center;gap:8px;color:#9e9e9e">
+          <mat-spinner diameter="20"></mat-spinner>
+          {{ 'CALIBRATION.WAITING' | translate }}
+        </div>
+      } @else {
+        <button mat-raised-button color="primary" (click)="capture(region)">
+          {{ region.rect.x || region.rect.y ? ('CALIBRATION.RECAPTURE_BTN' | translate) : ('CALIBRATION.CAPTURE_BTN' | translate) }}
+        </button>
+        @if (region.rect.x || region.rect.y) {
+          <span style="margin-left:12px;color:#9e9e9e">{{ 'CALIBRATION.CAPTURED' | translate }}: ({{ region.rect.x }}, {{ region.rect.y }})</span>
+        }
+      }
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <mat-form-field appearance="outline" style="width:110px">
+          <mat-label>{{ 'CALIBRATION.WIDTH' | translate }}</mat-label>
+          <input matInput type="number" [(ngModel)]="region.rect.w" (change)="refreshScreenshot(region)">
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width:110px">
+          <mat-label>{{ 'CALIBRATION.HEIGHT' | translate }}</mat-label>
+          <input matInput type="number" [(ngModel)]="region.rect.h" (change)="refreshScreenshot(region)">
+        </mat-form-field>
+      </div>
+    </div>
+    @if (region.screenshotUrl) {
+      <div>
+        <p style="margin:0 0 4px;color:#9e9e9e;font-size:0.8rem">Preview</p>
+        <img [src]="region.screenshotUrl" style="border:1px solid #444;max-width:300px;image-rendering:pixelated" alt="region preview">
+      </div>
+    }
+  </div>
+</ng-template>

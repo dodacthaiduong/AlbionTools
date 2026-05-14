@@ -4,6 +4,7 @@ import { TransactionsComponent } from './pages/transactions/transactions.compone
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { ConfigComponent } from './pages/config/config.component';
 import { BotStatusComponent } from './pages/bot-status/bot-status.component';
+import { CalibrationComponent } from './pages/calibration/calibration.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: 'inventory', component: InventoryComponent },
   { path: 'config', component: ConfigComponent },
   { path: 'bot-status', component: BotStatusComponent },
+  { path: 'calibration', component: CalibrationComponent },
 ];

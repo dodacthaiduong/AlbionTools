@@ -80,3 +80,48 @@ type InventorySnapshot struct {
 	EmptySlots          int                     `bson:"empty_slots" json:"empty_slots"`
 	TotalEstimatedValue int                     `bson:"total_estimated_value" json:"total_estimated_value"`
 }
+
+type CalibrationRect struct {
+	X int `bson:"x" json:"x"`
+	Y int `bson:"y" json:"y"`
+	W int `bson:"w" json:"w"`
+	H int `bson:"h" json:"h"`
+}
+
+type CalibrationCell struct {
+	Index int `bson:"index" json:"index"`
+	X     int `bson:"x" json:"x"`
+	Y     int `bson:"y" json:"y"`
+}
+
+type CalibrationInventory struct {
+	Rows      int               `bson:"rows" json:"rows"`
+	Cols      int               `bson:"cols" json:"cols"`
+	FirstCell CalibrationRect   `bson:"first_cell" json:"first_cell"`
+	LastCell  CalibrationRect   `bson:"last_cell" json:"last_cell"`
+	Cells     []CalibrationCell `bson:"cells" json:"cells"`
+}
+
+type CalibrationRegions struct {
+	SellNowButton   CalibrationRect `bson:"sell_now_button" json:"sell_now_button"`
+	BuyOrderPrice   CalibrationRect `bson:"buy_order_price" json:"buy_order_price"`
+	TooltipItemName CalibrationRect `bson:"tooltip_item_name" json:"tooltip_item_name"`
+	TooltipEstPrice CalibrationRect `bson:"tooltip_est_price" json:"tooltip_est_price"`
+	DisconnectIcon  CalibrationRect `bson:"disconnect_icon" json:"disconnect_icon"`
+	PopupClose      CalibrationRect `bson:"popup_close" json:"popup_close"`
+	SortButton      CalibrationRect `bson:"sort_button" json:"sort_button"`
+	StackButton     CalibrationRect `bson:"stack_button" json:"stack_button"`
+	EmptySlotSample CalibrationRect `bson:"empty_slot_sample" json:"empty_slot_sample"`
+}
+
+type CalibrationDoc struct {
+	ID          bson.ObjectID        `bson:"_id,omitempty" json:"id,omitempty"`
+	ProfileName string               `bson:"profile_name" json:"profile_name"`
+	Platform    string               `bson:"platform" json:"platform"`
+	Screen      map[string]int       `bson:"screen" json:"screen"`
+	Inventory   CalibrationInventory `bson:"inventory" json:"inventory"`
+	Regions     CalibrationRegions   `bson:"regions" json:"regions"`
+	CreatedAt   time.Time            `bson:"created_at" json:"created_at"`
+	UpdatedAt   time.Time            `bson:"updated_at" json:"updated_at"`
+}
+

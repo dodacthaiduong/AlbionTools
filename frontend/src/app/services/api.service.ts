@@ -43,6 +43,33 @@ export interface InventorySnapshot {
   total_estimated_value: number;
 }
 
+export interface CalibrationRect {
+  x: number; y: number; w: number; h: number;
+}
+
+export interface CalibrationDoc {
+  profile_name: string;
+  platform: string;
+  screen: { width: number; height: number };
+  inventory: {
+    rows: number; cols: number;
+    first_cell: CalibrationRect;
+    last_cell: CalibrationRect;
+    cells: { index: number; x: number; y: number }[];
+  };
+  regions: {
+    sell_now_button: CalibrationRect;
+    buy_order_price: CalibrationRect;
+    tooltip_item_name: CalibrationRect;
+    tooltip_est_price: CalibrationRect;
+    disconnect_icon: CalibrationRect;
+    popup_close: CalibrationRect;
+    sort_button: CalibrationRect;
+    stack_button: CalibrationRect;
+    empty_slot_sample: CalibrationRect;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private base = 'http://localhost:8080/api';
@@ -73,5 +100,25 @@ export class ApiService {
 
   getInventory(): Observable<{ data: InventorySnapshot | null }> {
     return this.http.get<{ data: InventorySnapshot | null }>(`${this.base}/inventory`);
+  }
+
+  getCalibrationProfiles(): Observable<{ data: string[] }> {
+    return this.http.get<{ data: string[] }>(`${this.base}/calibration/profiles`);
+  }
+
+  startCaptureClick(): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.base}/calibration/capture-click`, {});
+  }
+
+  pollCaptureClick(id: string): Observable<{ done: boolean; x?: number; y?: number }> {
+    return this.http.get<{ done: boolean; x?: number; y?: number }>(`${this.base}/calibration/capture-click/${id}`);
+  }
+
+  getScreenshotUrl(x: number, y: number, w: number, h: number): string {
+    return `${this.base}/calibration/screenshot?x=${x}&y=${y}&w=${w}&h=${h}`;
+  }
+
+  saveCalibration(doc: CalibrationDoc): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.base}/calibration/save`, doc);
   }
 }

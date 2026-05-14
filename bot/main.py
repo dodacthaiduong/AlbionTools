@@ -41,9 +41,19 @@ def calibrate(profile: str, backup_dir: str):
         close()
 
 
-@cli.command()
-@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
-def scan(profile: str):
+@cli.command("calibrate-server")
+def calibrate_server():
+    """Run the click capture server for GUI calibration."""
+    from albion_bot.calibration.capture_server import run_capture_server
+    try:
+        run_capture_server()
+    except KeyboardInterrupt:
+        click.echo("\nCapture server stopped.")
+    finally:
+        close()
+
+
+
     """Scan inventory and save items to MongoDB."""
     from albion_bot.inventory.scanner import scan_inventory
     try:

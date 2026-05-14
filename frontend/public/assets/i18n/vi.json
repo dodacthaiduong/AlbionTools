@@ -4,7 +4,8 @@
     "TRANSACTIONS": "Giao dịch",
     "INVENTORY": "Kho đồ",
     "CONFIG": "Cấu hình",
-    "BOT_STATUS": "Trạng thái Bot"
+    "BOT_STATUS": "Trạng thái Bot",
+    "CALIBRATION": "Hiệu chỉnh"
   },
   "DASHBOARD": {
     "TITLE": "Tổng quan",
@@ -56,6 +57,37 @@
     "RUNNING": "Đang chạy",
     "PAUSED": "Tạm dừng",
     "STOPPED": "Đã dừng"
+  },
+  "CALIBRATION": {
+    "TITLE": "Hiệu chỉnh",
+    "SUBTITLE": "Thiết lập vùng màn hình cho bot. Đảm bảo Albion Online đang mở.",
+    "PROFILE": "Tên hồ sơ",
+    "GRID_ROWS": "Số hàng kho đồ",
+    "GRID_COLS": "Số cột kho đồ",
+    "STEP_GRID": "Bố cục lưới",
+    "STEP_FIRST_CELL": "Ô kho đầu tiên",
+    "STEP_LAST_CELL": "Ô kho cuối cùng",
+    "STEP_REGIONS": "Vùng giao diện",
+    "STEP_REVIEW": "Xem lại & Lưu",
+    "CAPTURE_BTN": "Nhấn để chụp",
+    "RECAPTURE_BTN": "Chụp lại",
+    "CAPTURED": "Đã chụp",
+    "WAITING": "Đang chờ nhấp chuột...",
+    "WIDTH": "Chiều rộng (px)",
+    "HEIGHT": "Chiều cao (px)",
+    "NEXT": "Tiếp theo",
+    "BACK": "Quay lại",
+    "SAVE": "Lưu hiệu chỉnh",
+    "SAVED": "Đã lưu hiệu chỉnh!",
+    "SELL_NOW_BUTTON": "Nút Bán ngay",
+    "BUY_ORDER_PRICE": "Vùng giá lệnh mua",
+    "TOOLTIP_ITEM_NAME": "Tên vật phẩm trong tooltip",
+    "TOOLTIP_EST_PRICE": "Giá ước tính trong tooltip",
+    "DISCONNECT_ICON": "Biểu tượng mất kết nối",
+    "POPUP_CLOSE": "Nút đóng popup",
+    "SORT_BUTTON": "Nút sắp xếp",
+    "STACK_BUTTON": "Nút gộp",
+    "EMPTY_SLOT_SAMPLE": "Mẫu ô trống"
   },
   "LANG": {
     "EN": "EN",

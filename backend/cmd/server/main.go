@@ -67,6 +67,13 @@ func main() {
 		apiv1.PATCH("/item-configs/:id", handler.UpdateItemConfig)
 		apiv1.GET("/bot/status", handler.BotStatus)
 		apiv1.GET("/inventory", handler.GetInventory)
+
+		// Calibration GUI
+		apiv1.GET("/calibration/profiles", handler.ListCalibrationProfiles)
+		apiv1.POST("/calibration/save", handler.SaveCalibration)
+		apiv1.POST("/calibration/capture-click", handler.StartCaptureClick)
+		apiv1.GET("/calibration/capture-click/:id", handler.PollCaptureClick)
+		apiv1.GET("/calibration/screenshot", handler.Screenshot)
 	}
 
 	// Serve Angular static files
