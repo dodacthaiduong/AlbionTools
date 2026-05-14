@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -94,12 +95,13 @@ func main() {
 		apiv1.GET("/calibration/screenshot", handler.Screenshot)
 	}
 
-	// Serve Angular static files
+	// Serve Angular static files — use StaticFS to serve entire dist dir with correct MIME types
 	r.StaticFS("/assets", http.Dir(filepath.Join(frontendDist, "assets")))
 	r.StaticFile("/favicon.ico", filepath.Join(frontendDist, "favicon.ico"))
 	r.NoRoute(func(c *gin.Context) {
-		// Try to serve the file directly; fall back to index.html for Angular routing
-		reqPath := filepath.Join(frontendDist, filepath.Clean(c.Request.URL.Path))
+		// Strip leading slash before joining to avoid filepath.Join discarding frontendDist
+		urlPath := strings.TrimPrefix(c.Request.URL.Path, "/")
+		reqPath := filepath.Join(frontendDist, urlPath)
 		if info, err := os.Stat(reqPath); err == nil && !info.IsDir() {
 			c.File(reqPath)
 			return
