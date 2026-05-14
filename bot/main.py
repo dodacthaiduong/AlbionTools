@@ -1,12 +1,14 @@
 import click
 from albion_bot.db.connection import get_db, close
 from albion_bot.calibration.wizard import run_wizard, save_calibration
+from albion_bot.logging_config import setup_logging
 
 
 @click.group()
-def cli():
+@click.option("--log-level", default="INFO", show_default=True, help="Logging level.")
+def cli(log_level: str):
     """Albion Online auto-seller bot."""
-    pass
+    setup_logging(log_level)
 
 
 @cli.command()

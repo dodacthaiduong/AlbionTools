@@ -33,10 +33,42 @@ def _get_min_price(slot: ScannedSlot) -> int | None:
     })
     if not doc:
         return None
-    return doc.get("min_sell_price")
+    min_price = doc.get("min_sell_price")
+    if min_price is not None and doc.get("estimated_price"):
+        if min_price < doc["estimated_price"] * 0.5:
+            log.warning(
+                f"{slot.full_name}: min_sell_price {min_price} is less than 50% of "
+                f"estimated_price {doc['estimated_price']} — possible sell-at-loss risk."
+            )
+    return min_price
 
 
-def _save_transaction(tx: Transaction) -> None:
+def _save_inventory_snapshot(session_id: str, slots: list[ScannedSlot]) -> None:
+    db = get_db()
+    filled = [s for s in slots if not s.empty]
+    items = [
+        {
+            "slot": s.slot,
+            "config_id": "",
+            "full_name": s.full_name,
+            "tier": s.tier,
+            "enchant": s.enchant,
+            "quantity": s.quantity,
+        }
+        for s in filled
+    ]
+    total_est = sum(s.estimated_price or 0 for s in filled)
+    snapshot = {
+        "timestamp": datetime.now(timezone.utc),
+        "session_id": session_id,
+        "items": items,
+        "empty_slots": len(slots) - len(filled),
+        "total_estimated_value": total_est,
+    }
+    db.inventory_snapshots.insert_one(snapshot)
+
+
+
     db = get_db()
     db.transactions.insert_one(tx.model_dump())
 
@@ -95,6 +127,7 @@ def run_sell_loop(profile: str = "default", stop_flag: list[bool] | None = None)
 
             slots = scan_inventory(profile=profile)
             filled = [s for s in slots if not s.empty]
+            _save_inventory_snapshot(session_id, slots)
 
             # Phase 2: sell each item
             log.info(f"Phase 2: selling {len(filled)} items...")
