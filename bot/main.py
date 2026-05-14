@@ -54,9 +54,28 @@ def scan(profile: str):
 
 
 @cli.command()
-def sell():
-    """Start the selling loop (M3)."""
-    click.echo("Selling loop not yet implemented.")
+@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
+def sell(profile: str):
+    """Start the selling loop."""
+    import signal
+    from albion_bot.selling.loop import run_sell_loop
+
+    stop_flag = [False]
+
+    def _handle_signal(sig, frame):
+        click.echo("\nStop requested, finishing current cycle...")
+        stop_flag[0] = True
+
+    signal.signal(signal.SIGINT, _handle_signal)
+    signal.signal(signal.SIGTERM, _handle_signal)
+
+    try:
+        run_sell_loop(profile=profile, stop_flag=stop_flag)
+    except Exception as e:
+        click.echo(f"Sell loop error: {e}", err=True)
+        raise SystemExit(1)
+    finally:
+        close()
 
 
 if __name__ == "__main__":
