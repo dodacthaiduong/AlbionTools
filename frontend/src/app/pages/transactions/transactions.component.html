@@ -1,0 +1,38 @@
+<div class="page-container">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2>{{ 'TRANSACTIONS.TITLE' | translate }} ({{ total }})</h2>
+    <button mat-raised-button color="primary" (click)="exportCsv()">{{ 'TRANSACTIONS.EXPORT_CSV' | translate }}</button>
+  </div>
+  <mat-table [dataSource]="transactions">
+    <ng-container matColumnDef="timestamp">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.TIME' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.timestamp | date:'short' }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="item">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.ITEM' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.item.full_name }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="tier">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.TIER' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">T{{ t.item.tier }}.{{ t.item.enchant }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="quantity">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.QUANTITY' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.quantity }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="unit_price">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.UNIT_PRICE' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.unit_price | number }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="total_price">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.TOTAL' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.total_price | number }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="market_city">
+      <mat-header-cell *matHeaderCellDef>{{ 'TRANSACTIONS.CITY' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let t">{{ t.market_city }}</mat-cell>
+    </ng-container>
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

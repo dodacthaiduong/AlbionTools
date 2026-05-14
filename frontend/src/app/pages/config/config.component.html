@@ -1,0 +1,33 @@
+<div class="page-container">
+  <h2>{{ 'CONFIG.TITLE' | translate }}</h2>
+  <mat-table [dataSource]="items">
+    <ng-container matColumnDef="full_name">
+      <mat-header-cell *matHeaderCellDef>{{ 'CONFIG.ITEM' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let i">{{ i.full_name }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="tier">
+      <mat-header-cell *matHeaderCellDef>{{ 'CONFIG.TIER' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let i">T{{ i.tier }}.{{ i.enchant }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="estimated_price">
+      <mat-header-cell *matHeaderCellDef>Est. Price</mat-header-cell>
+      <mat-cell *matCellDef="let i">{{ i.estimated_price | number }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="min_sell_price">
+      <mat-header-cell *matHeaderCellDef>{{ 'CONFIG.MIN_PRICE' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let i">
+        <mat-form-field style="width:120px" appearance="outline">
+          <input matInput type="number" [(ngModel)]="editPrices[i.id]" [placeholder]="'CONFIG.NOT_SET' | translate">
+        </mat-form-field>
+      </mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let i">
+        <button mat-button color="primary" (click)="save(i)">{{ 'CONFIG.SAVE' | translate }}</button>
+      </mat-cell>
+    </ng-container>
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

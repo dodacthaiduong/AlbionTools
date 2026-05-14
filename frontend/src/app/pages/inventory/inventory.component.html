@@ -1,0 +1,31 @@
+<div class="page-container">
+  <h2>{{ 'INVENTORY.TITLE' | translate }}</h2>
+  @if (snapshot) {
+    <p style="color:#9e9e9e">
+      {{ 'INVENTORY.EMPTY_SLOTS' | translate }}: {{ snapshot.empty_slots }} &nbsp;|&nbsp;
+      {{ 'INVENTORY.TOTAL_VALUE' | translate }}: {{ snapshot.total_estimated_value | number }}
+    </p>
+    <mat-table [dataSource]="snapshot.items">
+      <ng-container matColumnDef="slot">
+        <mat-header-cell *matHeaderCellDef>{{ 'INVENTORY.SLOT' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let i">{{ i.slot }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="full_name">
+        <mat-header-cell *matHeaderCellDef>{{ 'INVENTORY.ITEM' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let i">{{ i.full_name }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="tier">
+        <mat-header-cell *matHeaderCellDef>{{ 'INVENTORY.TIER' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let i">T{{ i.tier }}.{{ i.enchant }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="quantity">
+        <mat-header-cell *matHeaderCellDef>{{ 'INVENTORY.QUANTITY' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let i">{{ i.quantity }}</mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  } @else {
+    <p style="color:#9e9e9e">No snapshot available yet.</p>
+  }
+</div>

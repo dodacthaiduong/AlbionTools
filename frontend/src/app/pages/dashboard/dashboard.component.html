@@ -1,0 +1,22 @@
+<div class="page-container">
+  <h2>{{ 'DASHBOARD.TITLE' | translate }}</h2>
+  <div>
+    <div class="stat-card">
+      <div class="stat-value">{{ session?.stats?.total_revenue ?? 0 | number }}</div>
+      <div class="stat-label">{{ 'DASHBOARD.TOTAL_REVENUE' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ session?.stats?.items_sold ?? 0 }}</div>
+      <div class="stat-label">{{ 'DASHBOARD.ITEMS_SOLD' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ session?.stats?.cycles_completed ?? 0 }}</div>
+      <div class="stat-label">{{ 'DASHBOARD.CYCLES' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ session?.stats?.errors_count ?? 0 }}</div>
+      <div class="stat-label">{{ 'DASHBOARD.ERRORS' | translate }}</div>
+    </div>
+  </div>
+  <p style="margin-top:24px;color:#9e9e9e">{{ 'BOT.STATUS' | translate }}: <strong>{{ status }}</strong></p>
+</div>

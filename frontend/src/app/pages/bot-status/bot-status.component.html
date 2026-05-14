@@ -1,0 +1,26 @@
+<div class="page-container">
+  <h2>{{ 'BOT.TITLE' | translate }}</h2>
+  <p>{{ 'BOT.STATUS' | translate }}: <strong>{{ status }}</strong></p>
+  @if (session) {
+    <div>
+      <div class="stat-card">
+        <div class="stat-value">{{ session.stats.cycles_completed }}</div>
+        <div class="stat-label">{{ 'BOT.CYCLES' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ session.stats.items_sold }}</div>
+        <div class="stat-label">{{ 'BOT.ITEMS_SOLD' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ session.stats.total_revenue | number }}</div>
+        <div class="stat-label">{{ 'BOT.REVENUE' | translate }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ session.stats.errors_count }}</div>
+        <div class="stat-label">{{ 'BOT.ERRORS' | translate }}</div>
+      </div>
+    </div>
+    <p style="color:#9e9e9e;margin-top:16px">{{ 'BOT.STARTED' | translate }}: {{ session.started_at | date:'medium' }}</p>
+  }
+  <button mat-button color="accent" style="margin-top:16px" (click)="refresh()">Refresh</button>
+</div>

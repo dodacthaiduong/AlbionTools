@@ -1,0 +1,64 @@
+{
+  "NAV": {
+    "DASHBOARD": "Tổng quan",
+    "TRANSACTIONS": "Giao dịch",
+    "INVENTORY": "Kho đồ",
+    "CONFIG": "Cấu hình",
+    "BOT_STATUS": "Trạng thái Bot"
+  },
+  "DASHBOARD": {
+    "TITLE": "Tổng quan",
+    "TOTAL_REVENUE": "Tổng doanh thu",
+    "ITEMS_SOLD": "Vật phẩm đã bán",
+    "CYCLES": "Chu kỳ hoàn thành",
+    "ERRORS": "Lỗi"
+  },
+  "TRANSACTIONS": {
+    "TITLE": "Giao dịch",
+    "EXPORT_CSV": "Xuất CSV",
+    "ITEM": "Vật phẩm",
+    "TIER": "Cấp",
+    "QUANTITY": "SL",
+    "UNIT_PRICE": "Đơn giá",
+    "TOTAL": "Tổng",
+    "CITY": "Thành phố",
+    "TIME": "Thời gian"
+  },
+  "INVENTORY": {
+    "TITLE": "Ảnh chụp kho đồ",
+    "SLOT": "Ô",
+    "ITEM": "Vật phẩm",
+    "TIER": "Cấp",
+    "QUANTITY": "SL",
+    "EST_PRICE": "Giá ước tính",
+    "EMPTY_SLOTS": "Ô trống",
+    "TOTAL_VALUE": "Tổng giá trị ước tính"
+  },
+  "CONFIG": {
+    "TITLE": "Cấu hình vật phẩm",
+    "ITEM": "Vật phẩm",
+    "TIER": "Cấp",
+    "MIN_PRICE": "Giá bán tối thiểu",
+    "ENABLED": "Kích hoạt",
+    "SAVE": "Lưu",
+    "NOT_SET": "Chưa đặt"
+  },
+  "BOT": {
+    "TITLE": "Trạng thái Bot",
+    "STATUS": "Trạng thái",
+    "SESSION": "Phiên",
+    "STARTED": "Bắt đầu",
+    "CYCLES": "Chu kỳ",
+    "ITEMS_SOLD": "Đã bán",
+    "REVENUE": "Doanh thu",
+    "ERRORS": "Lỗi",
+    "IDLE": "Chờ",
+    "RUNNING": "Đang chạy",
+    "PAUSED": "Tạm dừng",
+    "STOPPED": "Đã dừng"
+  },
+  "LANG": {
+    "EN": "EN",
+    "VI": "VI"
+  }
+}

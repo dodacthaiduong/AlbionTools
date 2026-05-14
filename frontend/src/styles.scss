@@ -1,1 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$cyan-palette,
+    tertiary: mat.$orange-palette,
+  ),
+  typography: (plain-family: 'Roboto, sans-serif'),
+));
+
+html {
+  @include mat.all-component-themes($dark-theme);
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #121212;
+}
+
+a { color: #80cbc4; }
+
+.mat-toolbar { background-color: #1e1e1e !important; }
+.mat-sidenav { background-color: #1a1a1a !important; }
+.mat-card { background-color: #1e1e1e !important; }
+
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  display: inline-block;
+  min-width: 160px;
+  margin: 8px;
+  padding: 16px 24px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  text-align: center;
+
+  .stat-value { font-size: 2rem; font-weight: 700; color: #80cbc4; }
+  .stat-label { font-size: 0.85rem; color: #9e9e9e; margin-top: 4px; }
+}

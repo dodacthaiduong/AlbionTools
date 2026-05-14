@@ -1,0 +1,64 @@
+{
+  "NAV": {
+    "DASHBOARD": "Dashboard",
+    "TRANSACTIONS": "Transactions",
+    "INVENTORY": "Inventory",
+    "CONFIG": "Config",
+    "BOT_STATUS": "Bot Status"
+  },
+  "DASHBOARD": {
+    "TITLE": "Dashboard",
+    "TOTAL_REVENUE": "Total Revenue",
+    "ITEMS_SOLD": "Items Sold",
+    "CYCLES": "Cycles Completed",
+    "ERRORS": "Errors"
+  },
+  "TRANSACTIONS": {
+    "TITLE": "Transactions",
+    "EXPORT_CSV": "Export CSV",
+    "ITEM": "Item",
+    "TIER": "Tier",
+    "QUANTITY": "Qty",
+    "UNIT_PRICE": "Unit Price",
+    "TOTAL": "Total",
+    "CITY": "City",
+    "TIME": "Time"
+  },
+  "INVENTORY": {
+    "TITLE": "Inventory Snapshot",
+    "SLOT": "Slot",
+    "ITEM": "Item",
+    "TIER": "Tier",
+    "QUANTITY": "Qty",
+    "EST_PRICE": "Est. Price",
+    "EMPTY_SLOTS": "Empty Slots",
+    "TOTAL_VALUE": "Total Est. Value"
+  },
+  "CONFIG": {
+    "TITLE": "Item Config",
+    "ITEM": "Item",
+    "TIER": "Tier",
+    "MIN_PRICE": "Min Sell Price",
+    "ENABLED": "Enabled",
+    "SAVE": "Save",
+    "NOT_SET": "Not set"
+  },
+  "BOT": {
+    "TITLE": "Bot Status",
+    "STATUS": "Status",
+    "SESSION": "Session",
+    "STARTED": "Started",
+    "CYCLES": "Cycles",
+    "ITEMS_SOLD": "Items Sold",
+    "REVENUE": "Revenue",
+    "ERRORS": "Errors",
+    "IDLE": "Idle",
+    "RUNNING": "Running",
+    "PAUSED": "Paused",
+    "STOPPED": "Stopped"
+  },
+  "LANG": {
+    "EN": "EN",
+    "VI": "VI"
+  }
+}
