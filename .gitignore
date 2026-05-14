@@ -1,0 +1,29 @@
+# Python
+bot/.venv/
+bot/__pycache__/
+bot/**/__pycache__/
+bot/**/*.pyc
+bot/.pytest_cache/
+bot/dist/
+bot/*.egg-info/
+
+# Go
+backend/bin/
+backend/*.exe
+
+# Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# Logs / screenshots
+*.log
+screenshots/
+
+# MongoDB data (if run locally in project)
+data/
