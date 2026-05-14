@@ -40,9 +40,17 @@ def calibrate(profile: str, backup_dir: str):
 
 
 @cli.command()
-def scan():
-    """Scan inventory (M2)."""
-    click.echo("Inventory scan not yet implemented.")
+@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
+def scan(profile: str):
+    """Scan inventory and save items to MongoDB."""
+    from albion_bot.inventory.scanner import scan_inventory
+    try:
+        scan_inventory(profile=profile)
+    except Exception as e:
+        click.echo(f"Scan failed: {e}", err=True)
+        raise SystemExit(1)
+    finally:
+        close()
 
 
 @cli.command()
