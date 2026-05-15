@@ -1,5 +1,7 @@
 import random
+
 import pydirectinput
+
 from albion_bot.platform.base import InputBackend
 
 

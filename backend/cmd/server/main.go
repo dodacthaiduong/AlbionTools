@@ -26,41 +26,53 @@ func main() {
 	viper.SetDefault("lan", false)
 	viper.AutomaticEnv()
 
-	// Resolve frontend dist path relative to project root (one level up from backend/)
+	log.Println("[KHỞI ĐỘNG] Albion Bot Backend đang khởi động...")
+
+	// Xác định thư mục frontend
+	log.Println("[BƯỚC 1] Đang tìm thư mục frontend đã build...")
 	exe, _ := os.Executable()
-	// When using `go run`, exe is in a temp dir; fall back to source-relative path
 	projectRoot := filepath.Join(filepath.Dir(exe), "..")
 	frontendDist := filepath.Join(projectRoot, "frontend", "dist", "albion-dashboard", "browser")
-	// Check if that path exists; if not, try relative to cwd (for `go run` from project root)
 	if _, err := os.Stat(frontendDist); err != nil {
 		cwd, _ := os.Getwd()
 		frontendDist = filepath.Join(cwd, "..", "frontend", "dist", "albion-dashboard", "browser")
 		if _, err := os.Stat(frontendDist); err != nil {
-			// Last resort: relative to cwd (running from project root)
 			frontendDist = filepath.Join(cwd, "frontend", "dist", "albion-dashboard", "browser")
 		}
 	}
-	log.Printf("serving frontend from: %s", frontendDist)
+	if _, err := os.Stat(frontendDist); err != nil {
+		log.Printf("[CẢNH BÁO] Không tìm thấy thư mục frontend tại: %s", frontendDist)
+		log.Println("[CẢNH BÁO] Nguyên nhân có thể: chưa chạy `npm run build` trong thư mục frontend/")
+	} else {
+		log.Printf("[BƯỚC 1 OK] Thư mục frontend: %s", frontendDist)
+	}
 
+	// Kết nối MongoDB
+	log.Printf("[BƯỚC 2] Đang kết nối MongoDB tại: %s ...", viper.GetString("mongo_uri"))
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	client, err := mongo.Connect(options.Client().ApplyURI(viper.GetString("mongo_uri")))
 	if err != nil {
-		log.Fatalf("mongo connect: %v", err)
+		log.Fatalf("[LỖI] Không thể kết nối MongoDB: %v\nNguyên nhân có thể: MongoDB chưa chạy hoặc sai địa chỉ URI.", err)
 	}
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Fatalf("mongo ping: %v", err)
+		log.Fatalf("[LỖI] Không ping được MongoDB: %v\nNguyên nhân có thể: MongoDB đang khởi động hoặc firewall chặn cổng 27017.", err)
 	}
-	log.Println("connected to MongoDB")
+	log.Printf("[BƯỚC 2 OK] Đã kết nối MongoDB. Database: '%s'", viper.GetString("mongo_db"))
 
+	// Khởi tạo các thành phần
+	log.Println("[BƯỚC 3] Đang khởi tạo repository, handler và WebSocket hub...")
 	repo := db.NewRepository(client, viper.GetString("mongo_db"))
 	handler := api.NewHandler(repo)
 	hub := ws.NewHub()
+	log.Println("[BƯỚC 3 OK] Đã khởi tạo xong.")
 
+	// Cấu hình router
+	log.Println("[BƯỚC 4] Đang cấu hình các route API...")
 	r := gin.Default()
 
-	// CORS for local Angular dev server
+	// CORS cho Angular dev server
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS")
@@ -83,23 +95,15 @@ func main() {
 		apiv1.GET("/transactions", handler.ListTransactions)
 		apiv1.GET("/transactions/export", handler.ExportTransactionsCSV)
 		apiv1.GET("/item-configs", handler.ListItemConfigs)
-		apiv1.PATCH("/item-configs/:id", handler.UpdateItemConfig)
 		apiv1.GET("/bot/status", handler.BotStatus)
 		apiv1.GET("/inventory", handler.GetInventory)
-
-		// Calibration GUI
-		apiv1.GET("/calibration/profiles", handler.ListCalibrationProfiles)
-		apiv1.POST("/calibration/save", handler.SaveCalibration)
-		apiv1.POST("/calibration/capture-click", handler.StartCaptureClick)
-		apiv1.GET("/calibration/capture-click/:id", handler.PollCaptureClick)
-		apiv1.GET("/calibration/screenshot", handler.Screenshot)
 	}
+	log.Println("[BƯỚC 4 OK] Các route API đã được đăng ký.")
 
-	// Serve Angular static files — use StaticFS to serve entire dist dir with correct MIME types
+	// Phục vụ file tĩnh Angular
 	r.StaticFS("/assets", http.Dir(filepath.Join(frontendDist, "assets")))
 	r.StaticFile("/favicon.ico", filepath.Join(frontendDist, "favicon.ico"))
 	r.NoRoute(func(c *gin.Context) {
-		// Strip leading slash before joining to avoid filepath.Join discarding frontendDist
 		urlPath := strings.TrimPrefix(c.Request.URL.Path, "/")
 		reqPath := filepath.Join(frontendDist, urlPath)
 		if info, err := os.Stat(reqPath); err == nil && !info.IsDir() {
@@ -113,8 +117,9 @@ func main() {
 	if viper.GetBool("lan") {
 		addr = "0.0.0.0:" + viper.GetString("port")
 	}
-	log.Printf("backend listening on %s", addr)
+	log.Printf("[KHỞI ĐỘNG XONG] Backend đang lắng nghe tại: http://%s", addr)
+	log.Println("[THÔNG TIN] Nhấn Ctrl+C để dừng server.")
 	if err := r.Run(addr); err != nil {
-		log.Fatalf("server: %v", err)
+		log.Fatalf("[LỖI] Server dừng bất ngờ: %v", err)
 	}
 }

@@ -1,6 +1,8 @@
 import click
-from albion_bot.db.connection import get_db, close
-from albion_bot.calibration.wizard import run_wizard, save_calibration
+
+from albion_bot.calibration.wizard import save_calibration
+from albion_bot.db.connection import close, get_db
+from albion_bot.debug_logger import DEBUG_MODE, tao_bao_cao_loi
 from albion_bot.logging_config import setup_logging
 
 
@@ -9,6 +11,8 @@ from albion_bot.logging_config import setup_logging
 def cli(log_level: str):
     """Albion Online auto-seller bot."""
     setup_logging(log_level)
+    if DEBUG_MODE:
+        click.echo("[DEBUG MODE] Chế độ debug đang BẬT — log chi tiết sẽ được ghi ra file debug.log")
 
 
 @cli.command()
@@ -25,51 +29,35 @@ def status():
 
 
 @cli.command()
-@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
-@click.option("--backup-dir", default=".", show_default=True, help="Directory for JSON backup.")
+@click.option(
+    "--profile", default="default", show_default=True, help="Calibration profile name."
+)
+@click.option(
+    "--backup-dir", default=".", show_default=True, help="Directory for JSON backup."
+)
 def calibrate(profile: str, backup_dir: str):
     """Run the calibration wizard."""
-    try:
-        cal = run_wizard(profile_name=profile)
-        inserted_id = save_calibration(cal, backup_dir=backup_dir)
-        click.echo(f"\nCalibration saved. MongoDB id: {inserted_id}")
-        click.echo(f"JSON backup: {backup_dir}/calibration_{profile}.json")
-    except Exception as e:
-        click.echo(f"Calibration failed: {e}", err=True)
-        raise SystemExit(1)
-    finally:
-        close()
-
-
-@cli.command("calibrate-server")
-def calibrate_server():
-    """Run the click capture server for GUI calibration."""
-    from albion_bot.calibration.capture_server import run_capture_server
-    try:
-        run_capture_server()
-    except KeyboardInterrupt:
-        click.echo("\nCapture server stopped.")
-    finally:
-        close()
-
-
-
-    """Scan inventory and save items to MongoDB."""
-    from albion_bot.inventory.scanner import scan_inventory
-    try:
-        scan_inventory(profile=profile)
-    except Exception as e:
-        click.echo(f"Scan failed: {e}", err=True)
-        raise SystemExit(1)
-    finally:
-        close()
+    click.echo(
+        "Calibration has moved to the desktop GUI. Run `make bot-gui` to launch it."
+    )
 
 
 @cli.command()
-@click.option("--profile", default="default", show_default=True, help="Calibration profile name.")
+def gui():
+    """Launch the desktop GUI."""
+    from albion_bot.gui.app import launch
+
+    launch()
+
+
+@cli.command()
+@click.option(
+    "--profile", default="default", show_default=True, help="Calibration profile name."
+)
 def sell(profile: str):
     """Start the selling loop."""
     import signal
+
     from albion_bot.selling.loop import run_sell_loop
 
     stop_flag = [False]

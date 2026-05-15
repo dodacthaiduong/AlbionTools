@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from datetime import datetime, timezone
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -25,8 +27,7 @@ class Cell(BaseModel):
 class InventoryConfig(BaseModel):
     rows: int = 8
     cols: int = 6
-    first_cell: Rect
-    last_cell: Rect
+    grid_rect: Rect  # bounding box of the entire inventory grid
     cells: list[Cell] = Field(default_factory=list)
 
 

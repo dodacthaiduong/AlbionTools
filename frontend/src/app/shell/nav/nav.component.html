@@ -1,19 +1,29 @@
-<mat-sidenav-container style="height:100vh">
-  <mat-sidenav mode="side" opened style="width:200px;padding:16px">
+<mat-sidenav-container style="height: 100vh">
+  <mat-sidenav mode="side" opened style="width: 200px; padding: 16px">
     <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">{{ 'NAV.DASHBOARD' | translate }}</a>
-      <a mat-list-item routerLink="/transactions" routerLinkActive="active">{{ 'NAV.TRANSACTIONS' | translate }}</a>
-      <a mat-list-item routerLink="/inventory" routerLinkActive="active">{{ 'NAV.INVENTORY' | translate }}</a>
-      <a mat-list-item routerLink="/config" routerLinkActive="active">{{ 'NAV.CONFIG' | translate }}</a>
-      <a mat-list-item routerLink="/bot-status" routerLinkActive="active">{{ 'NAV.BOT_STATUS' | translate }}</a>
-      <a mat-list-item routerLink="/calibration" routerLinkActive="active">{{ 'NAV.CALIBRATION' | translate }}</a>
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">{{
+        "NAV.DASHBOARD" | translate
+      }}</a>
+      <a mat-list-item routerLink="/transactions" routerLinkActive="active">{{
+        "NAV.TRANSACTIONS" | translate
+      }}</a>
+      <a mat-list-item routerLink="/inventory" routerLinkActive="active">{{
+        "NAV.INVENTORY" | translate
+      }}</a>
+      <a mat-list-item routerLink="/bot-status" routerLinkActive="active">{{
+        "NAV.BOT_STATUS" | translate
+      }}</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-toolbar>
-      <span style="flex:1">Albion Auto Seller</span>
+      <span style="flex: 1">Albion Auto Seller</span>
       <button mat-button (click)="toggleLang()">
-        {{ currentLang === 'en' ? ('LANG.VI' | translate) : ('LANG.EN' | translate) }}
+        {{
+          currentLang === "en"
+            ? ("LANG.VI" | translate)
+            : ("LANG.EN" | translate)
+        }}
       </button>
     </mat-toolbar>
     <router-outlet></router-outlet>

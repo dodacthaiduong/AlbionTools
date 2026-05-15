@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git branch *)",
+      "Bash(mkdir -p bot backend frontend docs)",
+      "Bash(uv init *)",
+      "Bash(curl -LsSf https://astral.sh/uv/install.sh)",
+      "Bash(sh)",
+      "Bash(export PATH=\"$HOME/.local/bin:$PATH\")",
+      "Bash(go version *)",
+      "Bash(wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz -O /tmp/go.tar.gz)",
+      "Bash(sudo tar -C /usr/local -xzf /tmp/go.tar.gz)",
+      "Bash(uv add *)",
+      "Bash(ng version *)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(ng new *)",
+      "Bash(npx @angular/cli@18 new albion-dashboard --directory . --routing true --style scss --skip-git true --package-manager npm)",
+      "Bash(uv run *)",
+      "Bash(systemctl status *)",
+      "Bash(mongod --version)",
+      "Bash(apt list *)"
+    ]
+  }
+}
