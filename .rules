@@ -256,5 +256,19 @@ If a fix attempt fails 2 times in a row for the same bug:
 - Wait for user confirmation before changing direction
 - Forbidden: trying a 3rd approach similar to the first 2 (wastes tokens)
 
----
+---Folders
 
+## 20. Ignore Heavy Folders
+
+NEVER read, scan, or list contents of these folders:
+- node_modules/
+- .git/
+- dist/ , build/ , out/ , .next/ , .nuxt/
+- __pycache__/ , .venv/ , venv/ , env/
+- .cache/ , .tmp/ , tmp/
+- vendor/ (PHP/Go)
+- target/ (Rust/Java)
+- *.log files
+
+If you need to understand a dependency: read package.json / requirements.txt instead.
+If you accidentally start reading one of these: STOP immediately and say so.
