@@ -53,6 +53,7 @@ Each AI response handles ONE concern only.
 If PROJECT.md does not exist at the project root, create it BEFORE doing anything else.
 
 PROJECT.md must include:
+- Last updated: date this file was last modified (update every time PROJECT.md changes)
 - Project purpose: what this project does in 2-3 simple sentences
 - Folder structure: list every important folder and what it contains
 - Key files: list the most important files and what each one does
