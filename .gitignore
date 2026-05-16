@@ -23,7 +23,11 @@ frontend/.angular/
 
 # Logs / screenshots
 *.log
+logs/
 screenshots/
+
+# Misc generated files
+DEBUG-GUIDE
 
 # MongoDB data (if run locally in project)
 data/
