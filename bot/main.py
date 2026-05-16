@@ -78,5 +78,21 @@ def sell(profile: str):
         close()
 
 
+@cli.command()
+def seed():
+    """Seed the database with item data."""
+    from albion_bot.db.seed import seed_bows
+
+    try:
+        db = get_db()
+        count = seed_bows(db)
+        click.echo(f"Seeded {count} bow items.")
+    except Exception as e:
+        click.echo(f"Seed error: {e}", err=True)
+        raise SystemExit(1)
+    finally:
+        close()
+
+
 if __name__ == "__main__":
     cli()

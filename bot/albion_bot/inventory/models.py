@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class ItemConfig(BaseModel):
+    item_id: Optional[str] = None
     base_name: str
     full_name: str
     tier: int
