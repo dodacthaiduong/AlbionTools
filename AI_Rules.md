@@ -1,9 +1,3 @@
-# Zed AI Rules Backup
-Generated: 2026-05-15 23:05
-Total: 19 rules
-
----
-
 ## 1. Communicate in Vietnamese
 
 - All explanations, plans, reports, and Q&A with the user MUST be in Vietnamese
