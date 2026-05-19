@@ -1,292 +1,158 @@
-## 1. Communicate in Vietnamese
+# AI Rules v2.1 — 2026-05-19
 
-- All explanations, plans, reports, and Q&A with the user MUST be in Vietnamese
-- Code, variable names, and code comments stay in English (international standard)
-- When reporting bugs or explaining issues: use simple Vietnamese, avoid jargon
-- If a technical English term is unavoidable, add a short Vietnamese explanation in parentheses
+## Part 1: Foundation — always apply
 
----
+**Language**
+Always respond in Vietnamese — all explanations, plans, reports, and Q&A. Code, variable names, and code comments stay in English. If a technical English term is unavoidable, add a short Vietnamese explanation in parentheses.
 
-## 2. Ask Before Assuming & Push Back When Needed
-
-When the user's request is ambiguous, vague, or could be interpreted multiple ways:
-- DO NOT guess and start coding — ask 1-3 short clarifying questions FIRST
-- Vague signals that REQUIRE clarification: "make it better", "optimize", "clean up",
-  "fix the bug" (which bug?), "improve performance", "make it work"
-- Exception: if the request is small and obvious (e.g. "fix typo in line 12"), proceed directly
-
-If the user requests something technically wrong or against their stated goal:
-- SAY IT DIRECTLY — "this approach has problem X, I suggest Y because Z"
-- Do not agree just to move on
-- However: after explaining, if the user still wants their way → respect it and proceed
-
----
-
-## 3. One Thing at a Time
-
-Each AI response handles ONE concern only.
-- One bug per response. If the user reports 3 bugs, fix #1, confirm it works, then move to #2
-- One feature per response. Don't bundle "add login" and "add logout" together
-- One refactor per response. Don't rename + restructure + reformat in one go
-- If multiple things are clearly entangled and must change together: state that explicitly
-  ("these 2 changes are coupled because X, doing them together") before proceeding
-
----
-
-## 4. Explain Everything
-
-- Before writing code, explain your plan in simple non-technical language
-- After writing code, summarize what was added/changed in plain Vietnamese
-- If there are multiple ways to solve something, briefly explain which you chose and why
-- Flag anything the user needs to manually do (install, configure, restart)
-
----
-
-## 5. Project Map (Auto-Generate & Use First)
-
-If PROJECT.md does not exist at the project root, create it BEFORE doing anything else.
-
-PROJECT.md must include:
-- Last updated: date this file was last modified (update every time PROJECT.md changes)
-- Project purpose: what this project does in 2-3 simple sentences
-- Folder structure: list every important folder and what it contains
-- Key files: list the most important files and what each one does
-- Entry point: which file runs first when the app starts
-- Config files: list any .env, config, or settings files
-- Ignore list: folders to never read (node_modules, .git, dist, build, etc.)
-- Dependencies: main libraries/frameworks being used
-
-Always read PROJECT.md FIRST at the start of every new task.
-Never scan the project freely — navigate only using what PROJECT.md describes.
-If something is missing from PROJECT.md, ask the user to update it instead of exploring freely.
-
----
-
-## 6. Fresh Start Protocol (New Project)
-
-When the user says "create new project X" or the project has no code yet:
-1. Ask 3 core questions only (no more):
-   - What does the project do? (1 sentence)
-   - Where does it run? (local machine / server / cloud / mobile)
-   - Does it need to store data? (file / database / no)
-2. Suggest the simplest stack that works. DO NOT over-engineer
-3. Create minimum structure: main file + .env.example + .gitignore + README + PROJECT.md
-4. Write a working "Hello World" version FIRST, then add features
-5. Once Hello World runs → user commits → only then move to the next step
-
----
-
-## 7. Safe Editing & No Unnecessary Rewrites
-
-- Never delete existing code — only add or modify
-- If you need to remove something, comment it out instead
-- Before changing any file, state what you are about to change and why
-- After finishing, list every file you modified
-
-- Never rewrite or refactor code that already works
-- Only touch the exact lines needed for the current task
-- Do not "clean up" or "improve" code unless explicitly asked
-- Do not add imports, dependencies, or new files unless necessary
-
----
-
-## 8. Scope Creep Prevention
-
-Do EXACTLY what was asked. Nothing more.
-- If the user asks for feature A, build feature A only. Do NOT add B, C, D
-  even if they "would be nice" or "usually go together"
-- Do NOT add validation, logging, error handling, or config options that
-  weren't requested — EXCEPTION: Auto Debug Logging rule always applies
-- If you spot a related improvement: write a short note at the end
-  ("By the way, I noticed X — want me to do it next?") but DO NOT do it now
-- When in doubt about scope: ask, don't expand
-
----
-
-## 9. Auto Debug Logging
-
-Every time you write new code or modify existing code, you MUST:
-
-1. Log every function
-   - Log on entry: function name + all input parameters
-   - Log on exit: return value
-   - Log important processing steps inside the function
-
-2. Full error handling
-   - Every function must have try/catch (or equivalent for the language)
-   - On error, log: error name + message + file + line number + input values at the time
-
-3. Auto-generate bug report when an error is caught:
-   --- BUG REPORT ---
-   Time        : [timestamp]
-   File        : [filename]
-   Function    : [function name]
-   Failed step : [description]
-   Error       : [error message]
-   Input       : [input values — redact token/password/api_key as [REDACTED]]
-   --- END REPORT ---
-
-4. Debug mode
-   - Use DEBUG=true/false variable to toggle logging on/off
-   - Default DEBUG=true in development
-   - When DEBUG=false, app runs with no log output
-
-5. Write logs to debug.log
-   - Format: [timestamp] [LEVEL] [file:line] message
-
----
-
-## 10. Error Message First
-
-When debugging or fixing a bug:
-- READ the full error message and stack trace BEFORE proposing any fix
-- Quote the exact error line and the file:line it points to in your reply
-- Identify the error TYPE first (syntax / import / null / type / network / permission / logic)
-  before guessing the cause
-- If no error message is provided: ASK the user for it. Do not guess from symptoms alone
-- Forbidden: jumping straight to "try this fix" without naming what the error says
-- If the error message is unclear: state what extra info you need
-  (full traceback, log file, the exact step that triggered it)
-
----
-
-## 11. Self-Documenting Code
-
-- Add a comment above every function explaining what it does in simple English
-- Add inline comments for any logic that is not obvious
-- At the top of every file, write a 2-line summary of what the file does
-- Never use abbreviations in variable/function names (use "userList" not "ul")
-
----
-
-## 12. Project Structure
-
-- Never scatter related files across random folders
-- Group files by feature, not by file type
-- If creating a new file, explain where it goes and why
-- Keep folder structure flat and simple unless complexity is truly needed
-
----
-
-## 13. Protect Secrets & Tokens
-
-This project may contain bot tokens (Telegram, Discord), API keys, DB passwords:
-- NEVER paste real values of tokens/keys/passwords into chat or logs
-- When logging/debugging: only log variable names, not values
-  (e.g., "TELEGRAM_TOKEN: [hidden]")
-- All secrets MUST live in .env, never hardcoded
+**Secrets & security**
+- All tokens, API keys, and passwords must live in .env — never hardcoded
+- In logs/debug: only log variable names, never values — e.g. TELEGRAM_TOKEN: [REDACTED]
 - Auto-add .env, *.key, config.local.* to .gitignore if missing
-- Before committing: check the diff for leaked secrets, WARN immediately if found
+- Before every commit: check the diff for leaked secrets — warn immediately if found
+
+**Tech stack**
+Project stack: MERN (MongoDB, Express, React, Node.js), Python, Go, Angular 18. Always suggest solutions that fit this stack. Never switch to a different technology without explicit user approval.
 
 ---
 
-## 14. Safe Dependencies
+## Part 2: Starting every task
 
-- DO NOT install new packages unless truly necessary. Prefer libraries already
-  in the project or the language's standard library
-- Before installing a new package: TELL the user the package name, purpose,
-  and ask for confirmation
-- Pin exact versions (e.g., requests==2.31.0), do not use ^ or latest
-- Watch out for typosquatting (e.g., python-telegram-bot is correct,
-  telegram-bot-python is suspicious)
-- After installing: update requirements.txt / package.json and prompt the user to commit
+**Read context files first**
+At the start of every task, read in order:
+1. PROJECT.md — understand project structure
+2. TRACKING.md — know current progress and next step
+3. docs/albion-auto-seller-plan.md — only when detailed requirements are needed
+Never scan the project freely. Only navigate using what PROJECT.md describes.
 
----
+**Check git status**
+Run git status before starting. If uncommitted changes exist → tell the user to commit or stash first. For large tasks (editing >3 files, new feature, refactor) → create a new branch: task/<short-description>.
 
-## 15. Git Checkpoint Before Editing
+**AI asks first — never assumes**
+- AI is proactive — always ask for what is needed. The user should never have to guess what information AI requires
+- For any ambiguous request → ask at most 3 short, clear questions before doing anything
+- Mandatory triggers: "make it better", "optimize", "fix the bug" (which one?), "improve", "clean up"
+- After receiving answers → repeat back your understanding in plain language → wait for user confirmation → only then start coding
+- If the user is still unclear after 2 rounds of questions → propose the simplest possible interpretation and ask "is this the right direction?"
 
-Before starting ANY task that modifies code:
-- Run git status. If there are uncommitted changes → TELL the user to commit or stash first
-- For large tasks (editing >3 files, adding new feature, refactoring): create a new branch
-  named task/<short-description> before working
-- After finishing a small working step: suggest the user commit with a clear message
-- NEVER auto-run git reset --hard, git clean -f, git push --force
-- If undo is needed: guide the user to use git checkout or git revert, do not do it yourself
-
----
-
-## 16. Prevent Regression When Adding Features
-
-Adding new features must not break existing ones.
-- Before adding a feature: list which functions/files will be affected
-- Ask the user: "should the existing feature XYZ stay unchanged?" before touching shared code
-- If a shared function must change: create a NEW function instead of editing the old one,
-  unless the user agrees
-- After finishing: list a checklist of old features the user should re-test
-- If tests/ or smoke tests exist: re-run them all before declaring done
+**Break large tasks into small steps**
+- If a task requires more than 3 steps → stop, list the plan as a simple numbered list, wait for user approval before starting
+- Each step = one conversation. Step complete → suggest commit → start a new chat
+- Reason: prevents context window bloat and AI forgetting earlier content
 
 ---
 
-## 17. Minimum Smoke Test
+## Part 3: While coding
 
-Every project MUST have a smoke_test file (or equivalent) that checks "does the app run?":
+**One thing at a time**
+Each response handles exactly one bug / one feature / one refactor. If multiple things must change together → state that explicitly before proceeding. If you spot a related improvement → note it at the end, do not act on it.
+
+**Explain before coding**
+Before writing code: explain your plan in simple non-technical Vietnamese. After writing code: summarize what was added or changed. Always list any manual steps the user must perform (install, configure, restart).
+
+**Never break working code**
+- Never delete code — comment it out if removal is needed
+- Never rewrite or refactor code that already works unless explicitly asked
+- Only touch the exact lines needed for the current task
+- Before editing any file: state what you will change and why. After finishing: list every file modified
+
+**Strict scope**
+Do exactly what was asked — nothing more. Do not add validation, logging, error handling, or config options that were not requested (Auto Debug Logging rule always applies). Do not add new dependencies unless truly necessary — always announce the package name, its purpose, and ask for confirmation first.
+
+**Prevent regression**
+- Before adding a feature: list which files and functions will be affected
+- If a shared function must change → create a new function instead of editing the old one, unless the user agrees otherwise
+- After finishing: provide a checklist of existing features the user should re-test
+
+**Auto debug logging**
+- Important functions: log on entry (name + params), log on exit (return value), log key processing steps
+- Small utility functions: try/catch only
+- Every caught error must log: error name + message + file + line + input values (redact tokens/passwords as [REDACTED])
+- Use DEBUG=true/false to toggle logging. Default DEBUG=true in development
+- Write logs to debug.log — format: [timestamp] [LEVEL] [file:line] message
+
+--- BUG REPORT ---
+Time     : [timestamp]
+File     : [filename]
+Function : [function name]
+Step     : [description of failed step]
+Error    : [error message]
+Input    : [input values — redact token/password as [REDACTED]]
+--- END REPORT ---
+
+**Self-documenting code**
+Add a comment above every function explaining what it does. Add inline comments for non-obvious logic. At the top of every file: 2-line summary of what the file does. Never use abbreviations in variable or function names (userList not ul).
+
+**File and folder structure**
+Group files by feature, not by file type. When creating a new file: explain where it goes and why. Keep folder structure flat and simple unless complexity is genuinely required.
+
+**Safe dependencies**
+Prefer libraries already in the project. For any new package: announce name + purpose + ask for confirmation. Pin exact versions (e.g. requests==2.31.0). After installing: update requirements.txt or package.json.
+
+---
+
+## Part 4: When bugs occur
+
+**Read the error first**
+- Read the full error message and stack trace before proposing any fix
+- Quote the exact error line and file:line in your reply
+- Identify the error type first: syntax / import / null / type / network / permission / logic
+- No error message provided → ask the user for it. Never guess from symptoms alone
+
+**Two-failure rule**
+If two consecutive fix attempts for the same bug both fail → stop patching. Write:
+"I tried approach A and B, both failed because of X. The root cause might be Y. A different approach would be Z. Should I try it?"
+Wait for user confirmation before changing direction. Never try a third approach similar to the first two.
+
+---
+
+## Part 5: Before saying "done"
+
+**Verify for real**
+Before saying "done" or "fixed", confirm all of the following:
+- Actually ran the code and pasted real output
+- New code has error handling
+- All new functions have comments
+- No existing functionality was broken
+- Debug mode can be toggled off
+- Listed all manual steps the user must take
+Cannot run in current environment → state clearly "couldn't test because..."
+Forbidden without evidence: "should work", "looks fine", "logic is correct".
+If the user reports "still broken" twice → stop patching, ask for the latest error and actual output.
+
+**Smoke test**
+Every project must have a smoke test that checks "does the app run?":
 - Web: hit the main endpoint, verify 200 response
-- Telegram/Discord bot: verify bot logs in, /start command replies
+- Bot: verify bot logs in, /start command replies
 - Script: run with sample input, verify no crash
-- Desktop app: verify it boots without import errors
+Run the smoke test after every code change before declaring done. No smoke test exists → create it before changing anything else.
 
-After EVERY code change: run the smoke test before declaring done.
-If no smoke test exists: create it as the first task, before changing anything else.
+**Update TRACKING.md**
+After every completed step, update TRACKING.md:
+- Move completed task to ## Completed — keep only name + date, drop step details
+- Update ## Current Task and ## Next Steps
+- Record any ## Known Issues if bugs remain
+- Write a ready-to-use ## Next Chat Prompt — the exact sentence the user should copy-paste into the next conversation
 
----
+**Update docs before commit**
+PROJECT.md (always): update Last updated, folder structure if changed, key files, dependencies if new packages were added.
+Plan file: if requirements changed → append to ## Change Log at the bottom (date, what changed, why). Never edit the original content directly.
+README.md: only update on significant changes — ask the user first, never edit on your own.
 
-## 18. Done Checklist & Verify For Real
-
-Before saying "done" or "fixed", always verify ALL of these:
-- [ ] Actually ran the code (run, build, or test) and pasted real output
-- [ ] The new code has error handling
-- [ ] All new functions have comments
-- [ ] No existing functionality was broken
-- [ ] Debug mode can be toggled off
-- [ ] List any manual steps the user must take
-
-If unable to run in the current environment → STATE CLEARLY "couldn't test because..."
-Forbidden phrases without evidence: "should work", "looks fine", "logic is correct"
-If the user reports "still broken" twice for the same issue → STOP patching,
-ask the user to paste the latest error and actual output again
+**Suggest commits**
+After each small working step → suggest the user commit with a clear message. Never auto-run git reset --hard, git clean -f, or git push --force. If undo is needed → guide the user to use git checkout or git revert.
 
 ---
 
-## 19. Two-Failure Rule
+## Part 6: New projects
 
-If a fix attempt fails 2 times in a row for the same bug:
-- STOP patching
-- Write out: "I tried approach A and B, both failed because of X.
-  The root cause might be Y. A different approach would be Z. Should I try it?"
-- Wait for user confirmation before changing direction
-- Forbidden: trying a 3rd approach similar to the first 2 (wastes tokens)
+**Fresh start protocol**
+When the user says "create new project":
+1. Ask exactly 3 questions: what does it do? where does it run? does it need to store data?
+2. Suggest the simplest stack that works
+3. Create minimum structure: main file + .env.example + .gitignore + README.md + PROJECT.md + TRACKING.md
+4. Write a working Hello World first → user commits → only then add features
 
----Folders
-
-## 20. Ignore Heavy Folders
-
-NEVER read, scan, or list contents of these folders:
-- node_modules/
-- .git/
-- dist/ , build/ , out/ , .next/ , .nuxt/
-- __pycache__/ , .venv/ , venv/ , env/
-- .cache/ , .tmp/ , tmp/
-- vendor/ (PHP/Go)
-- target/ (Rust/Java)
-- *.log files
-
-If you need to understand a dependency: read package.json / requirements.txt instead.
-
----
-
-## 21. Doc Sync Before Commit
-
-Before suggesting a commit, you MUST check and update the following:
-
-**PROJECT.md** (always):
-- `Last updated` → update to current date
-- `Folder structure` → if any folder was added or removed
-- `Key files` → if any important file was added or removed
-- `Dependencies` → if any new package was installed
-
-**README.md** (only when there is a significant change):
-- A major feature was added or removed
-- Installation or run instructions have changed
-- Project structure changed significantly
-- If README needs updating → ask the user first, do NOT edit it on your own
-If you accidentally start reading one of these: STOP immediately and say so.
+**Ignored folders**
+Never read or scan: node_modules/, .git/, dist/, build/, .next/, __pycache__/, .venv/, venv/, logs/, *.log
+To understand a dependency → read package.json or requirements.txt instead.
