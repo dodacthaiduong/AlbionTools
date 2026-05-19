@@ -271,4 +271,22 @@ NEVER read, scan, or list contents of these folders:
 - *.log files
 
 If you need to understand a dependency: read package.json / requirements.txt instead.
+
+---
+
+## 21. Doc Sync Before Commit
+
+Before suggesting a commit, you MUST check and update the following:
+
+**PROJECT.md** (always):
+- `Last updated` → update to current date
+- `Folder structure` → if any folder was added or removed
+- `Key files` → if any important file was added or removed
+- `Dependencies` → if any new package was installed
+
+**README.md** (only when there is a significant change):
+- A major feature was added or removed
+- Installation or run instructions have changed
+- Project structure changed significantly
+- If README needs updating → ask the user first, do NOT edit it on your own
 If you accidentally start reading one of these: STOP immediately and say so.
