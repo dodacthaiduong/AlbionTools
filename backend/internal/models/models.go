@@ -20,7 +20,7 @@ type ItemConfig struct {
 	Tier           int           `bson:"tier" json:"tier"`
 	Enchant        int           `bson:"enchant" json:"enchant"`
 	EstimatedPrice *int          `bson:"estimated_price" json:"estimated_price"`
-	MinSellPrice   *int          `bson:"min_sell_price" json:"min_sell_price"`
+	CostPrice      *int          `bson:"cost_price" json:"cost_price"`
 	Enabled        bool          `bson:"enabled" json:"enabled"`
 	LastScannedAt  time.Time     `bson:"last_scanned_at" json:"last_scanned_at"`
 	CreatedAt      time.Time     `bson:"created_at" json:"created_at"`
@@ -35,15 +35,15 @@ type TransactionItem struct {
 }
 
 type Transaction struct {
-	ID          bson.ObjectID   `bson:"_id,omitempty" json:"id"`
-	Timestamp   time.Time       `bson:"timestamp" json:"timestamp"`
-	SessionID   string          `bson:"session_id" json:"session_id"`
-	Item        TransactionItem `bson:"item" json:"item"`
-	Quantity    int             `bson:"quantity" json:"quantity"`
-	UnitPrice   int             `bson:"unit_price" json:"unit_price"`
-	TotalPrice  int             `bson:"total_price" json:"total_price"`
-	MarketCity  string          `bson:"market_city" json:"market_city"`
-	Status      string          `bson:"status" json:"status"`
+	ID         bson.ObjectID   `bson:"_id,omitempty" json:"id"`
+	Timestamp  time.Time       `bson:"timestamp" json:"timestamp"`
+	SessionID  string          `bson:"session_id" json:"session_id"`
+	Item       TransactionItem `bson:"item" json:"item"`
+	Quantity   int             `bson:"quantity" json:"quantity"`
+	UnitPrice  int             `bson:"unit_price" json:"unit_price"`
+	TotalPrice int             `bson:"total_price" json:"total_price"`
+	MarketCity string          `bson:"market_city" json:"market_city"`
+	Status     string          `bson:"status" json:"status"`
 }
 
 type SessionStats struct {
@@ -54,22 +54,22 @@ type SessionStats struct {
 }
 
 type BotSession struct {
-	ID             bson.ObjectID  `bson:"_id,omitempty" json:"id"`
-	StartedAt      time.Time      `bson:"started_at" json:"started_at"`
-	EndedAt        *time.Time     `bson:"ended_at,omitempty" json:"ended_at,omitempty"`
-	Status         string         `bson:"status" json:"status"`
-	StopReason     *string        `bson:"stop_reason,omitempty" json:"stop_reason,omitempty"`
-	Stats          SessionStats   `bson:"stats" json:"stats"`
-	CalibrationID  *string        `bson:"calibration_id,omitempty" json:"calibration_id,omitempty"`
+	ID            bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	StartedAt     time.Time     `bson:"started_at" json:"started_at"`
+	EndedAt       *time.Time    `bson:"ended_at,omitempty" json:"ended_at,omitempty"`
+	Status        string        `bson:"status" json:"status"`
+	StopReason    *string       `bson:"stop_reason,omitempty" json:"stop_reason,omitempty"`
+	Stats         SessionStats  `bson:"stats" json:"stats"`
+	CalibrationID *string       `bson:"calibration_id,omitempty" json:"calibration_id,omitempty"`
 }
 
 type InventorySnapshotItem struct {
-	Slot       int    `bson:"slot" json:"slot"`
-	ConfigID   string `bson:"config_id" json:"config_id"`
-	FullName   string `bson:"full_name" json:"full_name"`
-	Tier       int    `bson:"tier" json:"tier"`
-	Enchant    int    `bson:"enchant" json:"enchant"`
-	Quantity   int    `bson:"quantity" json:"quantity"`
+	Slot     int    `bson:"slot" json:"slot"`
+	ConfigID string `bson:"config_id" json:"config_id"`
+	FullName string `bson:"full_name" json:"full_name"`
+	Tier     int    `bson:"tier" json:"tier"`
+	Enchant  int    `bson:"enchant" json:"enchant"`
+	Quantity int    `bson:"quantity" json:"quantity"`
 }
 
 type InventorySnapshot struct {
@@ -103,15 +103,18 @@ type CalibrationInventory struct {
 }
 
 type CalibrationRegions struct {
-	SellNowButton   CalibrationRect `bson:"sell_now_button" json:"sell_now_button"`
-	BuyOrderPrice   CalibrationRect `bson:"buy_order_price" json:"buy_order_price"`
-	TooltipItemName CalibrationRect `bson:"tooltip_item_name" json:"tooltip_item_name"`
-	TooltipEstPrice CalibrationRect `bson:"tooltip_est_price" json:"tooltip_est_price"`
-	DisconnectIcon  CalibrationRect `bson:"disconnect_icon" json:"disconnect_icon"`
-	PopupClose      CalibrationRect `bson:"popup_close" json:"popup_close"`
-	SortButton      CalibrationRect `bson:"sort_button" json:"sort_button"`
-	StackButton     CalibrationRect `bson:"stack_button" json:"stack_button"`
-	EmptySlotSample CalibrationRect `bson:"empty_slot_sample" json:"empty_slot_sample"`
+	LowestSellOrderPrice   CalibrationRect  `bson:"lowest_sell_order_price" json:"lowest_sell_order_price"`
+	SellOrderPriceInput    *CalibrationRect `bson:"sell_order_price_input,omitempty" json:"sell_order_price_input,omitempty"`
+	SellOrderConfirmButton *CalibrationRect `bson:"sell_order_confirm_button,omitempty" json:"sell_order_confirm_button,omitempty"`
+	MyOrdersTab            *CalibrationRect `bson:"my_orders_tab,omitempty" json:"my_orders_tab,omitempty"`
+	MyOrdersList           *CalibrationRect `bson:"my_orders_list,omitempty" json:"my_orders_list,omitempty"`
+	TooltipItemName        CalibrationRect  `bson:"tooltip_item_name" json:"tooltip_item_name"`
+	TooltipEstPrice        CalibrationRect  `bson:"tooltip_est_price" json:"tooltip_est_price"`
+	DisconnectIcon         CalibrationRect  `bson:"disconnect_icon" json:"disconnect_icon"`
+	PopupClose             CalibrationRect  `bson:"popup_close" json:"popup_close"`
+	SortButton             CalibrationRect  `bson:"sort_button" json:"sort_button"`
+	StackButton            CalibrationRect  `bson:"stack_button" json:"stack_button"`
+	EmptySlotSample        CalibrationRect  `bson:"empty_slot_sample" json:"empty_slot_sample"`
 }
 
 type CalibrationDoc struct {
@@ -124,4 +127,3 @@ type CalibrationDoc struct {
 	CreatedAt   time.Time            `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time            `bson:"updated_at" json:"updated_at"`
 }
-

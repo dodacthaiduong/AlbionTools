@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Rect(BaseModel):
@@ -32,8 +32,7 @@ class InventoryConfig(BaseModel):
 
 
 class Regions(BaseModel):
-    sell_now_button: Rect
-    buy_order_price: Rect
+    lowest_sell_order_price: Rect
     tooltip_item_name: Rect
     tooltip_est_price: Rect
     disconnect_icon: Rect
@@ -41,6 +40,20 @@ class Regions(BaseModel):
     sort_button: Rect
     stack_button: Rect
     empty_slot_sample: Rect
+
+    # New regions for sell-order workflow
+    sell_order_price_input: Optional[Rect] = None
+    sell_order_confirm_button: Optional[Rect] = None
+    my_orders_tab: Optional[Rect] = None
+    my_orders_list: Optional[Rect] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _legacy_buy_order_price_alias(cls, data):
+        if isinstance(data, dict):
+            if "lowest_sell_order_price" not in data and "buy_order_price" in data:
+                data["lowest_sell_order_price"] = data["buy_order_price"]
+        return data
 
 
 class Calibration(BaseModel):

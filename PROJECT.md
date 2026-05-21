@@ -1,13 +1,14 @@
 # PROJECT.md — Albion Auto Seller
 
-**Last updated:** 2026-05-16
+**Last updated:** 2026-05-21
 
 ---
 
 ## Project Purpose
 
-Bot tự động bán đồ trên chợ Albion Online bằng cách mô phỏng chuột/bàn phím (OCR đọc giá, click nút bán).
-Kèm theo dashboard web để xem lịch sử giao dịch và cấu hình giá tối thiểu cho từng vật phẩm.
+Bot tự động bán đồ trên chợ Albion Online bằng cách mô phỏng chuột/bàn phím.
+Hiện tại workflow chính là **sell order** (không còn quicksell Sell Now): bot đọc giá sell thấp nhất (OCR ưu tiên, fallback API), tính giá đặt theo rule bước 1000, và chỉ đặt order khi net revenue sau phí không thấp hơn `cost_price`.
+Kèm theo dashboard web để xem lịch sử giao dịch và cấu hình `cost_price` cho từng vật phẩm.
 Chạy trên Linux X11 (và Windows), dữ liệu lưu vào MongoDB local.
 
 ---
@@ -54,8 +55,10 @@ ProjectCode/
 | File | Mô tả |
 |---|---|
 | `bot/main.py` | CLI entry point — các lệnh: `sell`, `gui`, `calibrate`, `status` |
-| `bot/albion_bot/selling/loop.py` | Vòng lặp bán hàng chính |
-| `bot/albion_bot/selling/market.py` | Logic kiểm tra giá và nhấn nút bán |
+| `bot/albion_bot/selling/loop.py` | Vòng lặp sell-order chính |
+| `bot/albion_bot/selling/market.py` | Logic đặt sell order + reconcile order đã khớp |
+| `bot/albion_bot/selling/price.py` | Logic lấy giá thấp nhất (OCR/API), tính giá đặt và phí |
+| `bot/albion_bot/selling/config.py` | Đọc global config (`is_premium`) từ MongoDB |
 | `bot/albion_bot/inventory/scanner.py` | Quét từng ô kho đồ bằng OCR |
 | `bot/albion_bot/ocr/reader.py` | Đọc chữ và giá từ màn hình |
 | `bot/albion_bot/calibration/wizard.py` | Lưu calibration vào MongoDB |

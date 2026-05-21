@@ -1,5 +1,6 @@
 import logging
 import random
+import subprocess
 import time
 from Xlib import display, X
 from Xlib.ext.xtest import fake_input
@@ -25,6 +26,17 @@ class LinuxInput(InputBackend):
         log.debug(f"Di chuyển chuột đến ({jx}, {jy}) [mục tiêu: ({x}, {y})]")
         fake_input(self._display, X.MotionNotify, x=jx, y=jy)
         self._display.sync()
+
+    def type_text(self, text: str) -> None:
+        log.debug("Nhập văn bản bằng xdotool: '%s'", text)
+        subprocess.run(["xdotool", "type", "--delay", "20", text], check=True)
+
+    def hotkey(self, *keys: str) -> None:
+        if not keys:
+            return
+        combo = "+".join(keys)
+        log.debug("Nhấn tổ hợp phím bằng xdotool: %s", combo)
+        subprocess.run(["xdotool", "key", combo], check=True)
 
     def click(self, x: int, y: int) -> None:
         self.move(x, y)

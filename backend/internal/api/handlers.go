@@ -97,7 +97,7 @@ func (h *Handler) UpdateItemConfig(c *gin.Context) {
 	}
 
 	var body struct {
-		MinSellPrice *int `json:"min_sell_price"`
+		CostPrice *int `json:"cost_price"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		log.Printf("[LỖI] Dữ liệu gửi lên không đúng định dạng: %v", err)
@@ -105,12 +105,12 @@ func (h *Handler) UpdateItemConfig(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.UpdateMinSellPrice(c.Request.Context(), oid, body.MinSellPrice); err != nil {
-		log.Printf("[LỖI] Không cập nhật được giá tối thiểu: %v", err)
+	if err := h.repo.UpdateCostPrice(c.Request.Context(), oid, body.CostPrice); err != nil {
+		log.Printf("[LỖI] Không cập nhật được giá vốn: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("[API OK] Đã cập nhật giá tối thiểu cho vật phẩm %s.", idStr)
+	log.Printf("[API OK] Đã cập nhật giá vốn cho vật phẩm %s.", idStr)
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 

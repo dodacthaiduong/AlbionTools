@@ -22,6 +22,12 @@ class InputBackend:
     def click(self, x: int, y: int) -> None:
         raise NotImplementedError
 
+    def type_text(self, text: str) -> None:
+        raise NotImplementedError
+
+    def hotkey(self, *keys: str) -> None:
+        raise NotImplementedError
+
 
 def get_input_backend() -> InputBackend:
     log.debug("Đang xác định hệ điều hành để chọn bộ điều khiển chuột...")

@@ -45,7 +45,7 @@ def _upsert_item_config(slot: ScannedSlot) -> None:
             "updated_at": now,
         },
         "$setOnInsert": {
-            "min_sell_price": None,
+            "cost_price": None,
             "enabled": True,
             "created_at": now,
         },

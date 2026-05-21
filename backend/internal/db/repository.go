@@ -46,12 +46,12 @@ func (r *Repository) ListItemConfigs(ctx context.Context) ([]models.ItemConfig, 
 	return results, cur.All(ctx, &results)
 }
 
-func (r *Repository) UpdateMinSellPrice(ctx context.Context, id bson.ObjectID, price *int) error {
+func (r *Repository) UpdateCostPrice(ctx context.Context, id bson.ObjectID, price *int) error {
 	_, err := r.db.Collection("item_configs").UpdateOne(
 		ctx,
 		bson.D{{Key: "_id", Value: id}},
 		bson.D{{Key: "$set", Value: bson.D{
-			{Key: "min_sell_price", Value: price},
+			{Key: "cost_price", Value: price},
 			{Key: "updated_at", Value: time.Now().UTC()},
 		}}},
 	)

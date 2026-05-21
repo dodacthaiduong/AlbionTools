@@ -11,7 +11,7 @@ class ItemConfig(BaseModel):
     tier: int
     enchant: int
     estimated_price: Optional[int] = None
-    min_sell_price: Optional[int] = None
+    cost_price: Optional[int] = None
     enabled: bool = True
     last_scanned_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

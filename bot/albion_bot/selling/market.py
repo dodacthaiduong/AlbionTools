@@ -4,28 +4,37 @@ import logging
 import random
 import time
 from datetime import datetime, timezone
+from typing import Optional
 
-from albion_bot.calibration.models import Calibration
-from albion_bot.debug_logger import (
-    DEBUG_MODE,
-    buoc_thanh_cong,
-    cap_nhat_buoc,
-    tao_bao_cao_loi,
-)
+from bson import ObjectId
+
+from albion_bot.calibration.models import Calibration, Rect
+from albion_bot.db.connection import get_db
+from albion_bot.debug_logger import buoc_thanh_cong, cap_nhat_buoc
 from albion_bot.inventory.models import ScannedSlot
-from albion_bot.ocr.reader import read_price, read_text
+from albion_bot.ocr.reader import read_text
 from albion_bot.platform.base import InputBackend
-from albion_bot.selling.detection import is_disconnect_visible, is_red_button
-from albion_bot.selling.models import Transaction, TransactionItem
+from albion_bot.selling.detection import is_disconnect_visible
+from albion_bot.selling.models import SellOrder, Transaction, TransactionItem
+from albion_bot.selling.price import evaluate_sell_order_price, get_lowest_sell_price
 
 log = logging.getLogger(__name__)
-
-_MARKET_LAG_WAIT = 5.0
-_MAX_ORDERS_TO_CHECK = 10
 
 
 def _jitter_sleep(lo: float = 0.2, hi: float = 0.5) -> None:
     time.sleep(random.uniform(lo, hi))
+
+
+def _require_region(region: Optional[Rect], key: str) -> Rect:
+    if region is None:
+        raise RuntimeError(
+            f"Calibration region '{key}' chưa được chọn. Hãy mở tab Calibration và chọn lại vùng này."
+        )
+    return region
+
+
+def _center_click(backend: InputBackend, rect: Rect) -> None:
+    backend.click(rect.x + rect.w // 2, rect.y + rect.h // 2)
 
 
 def wait_for_disconnect_clear(cal: Calibration, poll_interval: float = 2.0) -> None:
@@ -41,7 +50,7 @@ def wait_for_disconnect_clear(cal: Calibration, poll_interval: float = 2.0) -> N
 def close_popup(backend: InputBackend, cal: Calibration) -> None:
     log.debug("Đang đóng cửa sổ popup...")
     r = cal.regions.popup_close
-    backend.click(r.x + r.w // 2, r.y + r.h // 2)
+    _center_click(backend, r)
     _jitter_sleep()
 
 
@@ -57,103 +66,233 @@ def read_market_city(cal: Calibration) -> str:
             timeout=2,
         )
         title = result.stdout.strip()
-        log.debug(f"Tiêu đề cửa sổ Albion: '{title}'")
         # Title format: "Albion Online Client  - <City>"
         if " - " in title:
             city = title.split(" - ", 1)[1].strip() or "Unknown"
-            log.debug(f"Thành phố chợ hiện tại: {city}")
             return city
     except Exception as e:
         log.debug(f"Không đọc được tiêu đề cửa sổ: {e}")
     return "Unknown"
 
 
-def try_sell_item(
+def _item_order_filter(slot: ScannedSlot) -> dict:
+    return {
+        "item.base_name": slot.base_name,
+        "item.tier": slot.tier,
+        "item.enchant": slot.enchant,
+        "status": "open",
+    }
+
+
+def has_open_sell_order(slot: ScannedSlot) -> bool:
+    db = get_db()
+    return db.sell_orders.find_one(_item_order_filter(slot)) is not None
+
+
+def place_sell_order(
     slot: ScannedSlot,
     session_id: str,
     cal: Calibration,
     backend: InputBackend,
-    min_sell_price: int,
-) -> Transaction | None:
-    """
-    Thử bán một vật phẩm. Trả về Transaction nếu thành công, None nếu bỏ qua.
-    Raise exception nếu gặp lỗi không thể phục hồi.
+    cost_price: int,
+    is_premium: bool,
+) -> SellOrder | None:
+    """Place a sell order for one item slot.
+
+    Returns SellOrder if successfully listed, None if skipped by price/profit checks.
+    Raises exception for non-recoverable workflow errors.
     """
     regions = cal.regions
-    log.debug(f"Bắt đầu thử bán: {slot.full_name} (ô {slot.slot}), giá tối thiểu: {min_sell_price:,}")
 
-    for attempt in range(_MAX_ORDERS_TO_CHECK):
-        log.debug(f"Ô {slot.slot}: kiểm tra lệnh mua thứ {attempt + 1}/{_MAX_ORDERS_TO_CHECK}")
-        cap_nhat_buoc(
-            f"Kiểm tra lệnh mua cho {slot.full_name}",
-            o=slot.slot, lan_thu=attempt + 1, gia_toi_thieu=min_sell_price
+    # Avoid duplicate open orders for the same item type.
+    if has_open_sell_order(slot):
+        log.debug(
+            "Đã có open order cho %s (T%s.%s) — bỏ qua.",
+            slot.base_name,
+            slot.tier,
+            slot.enchant,
+        )
+        return None
+
+    if is_disconnect_visible(regions.disconnect_icon):
+        wait_for_disconnect_clear(cal)
+
+    sell_order_price_input = _require_region(regions.sell_order_price_input, "sell_order_price_input")
+    sell_order_confirm_button = _require_region(
+        regions.sell_order_confirm_button,
+        "sell_order_confirm_button",
+    )
+
+    market_city = read_market_city(cal)
+    lowest_price = get_lowest_sell_price(slot, market_city, regions.lowest_sell_order_price)
+    if lowest_price is None:
+        log.info(
+            "Ô %s (%s): không đọc được giá sell order thấp nhất (OCR/API đều fail) — bỏ qua.",
+            slot.slot,
+            slot.full_name,
+        )
+        return None
+
+    decision = evaluate_sell_order_price(lowest_price, cost_price, is_premium)
+    if decision is None:
+        log.info(
+            "Ô %s (%s): đặt order không đạt điều kiện lợi nhuận sau phí (lowest=%s, cost=%s) — bỏ qua.",
+            slot.slot,
+            slot.full_name,
+            lowest_price,
+            cost_price,
+        )
+        return None
+
+    listed_price = int(decision["listed_price"])
+    listing_fee = int(decision["listing_fee"])
+    transaction_fee = int(decision["transaction_fee"])
+    net_revenue = int(decision["net_revenue"])
+
+    cap_nhat_buoc(
+        f"Đặt sell order {slot.full_name}",
+        o=slot.slot,
+        gia_thap_nhat=lowest_price,
+        gia_dat=listed_price,
+        gia_von=cost_price,
+    )
+
+    # Select item slot again (safety), then fill sell-order input.
+    # scan_inventory already clicked slots earlier; we click center point once more for reliability.
+    # Here we assume current UI focus is still in market/inventory context.
+    _center_click(backend, sell_order_price_input)
+    _jitter_sleep(0.1, 0.2)
+    backend.hotkey("ctrl", "a")
+    _jitter_sleep(0.05, 0.15)
+    backend.type_text(str(listed_price))
+    _jitter_sleep(0.15, 0.3)
+
+    if is_disconnect_visible(regions.disconnect_icon):
+        wait_for_disconnect_clear(cal)
+        return None
+
+    _center_click(backend, sell_order_confirm_button)
+    _jitter_sleep(0.4, 0.8)
+
+    order = SellOrder(
+        session_id=session_id,
+        item=TransactionItem(
+            base_name=slot.base_name,
+            full_name=slot.full_name,
+            tier=slot.tier,
+            enchant=slot.enchant,
+        ),
+        quantity=1,
+        listed_price=listed_price,
+        market_city=market_city,
+        is_premium=is_premium,
+        listing_fee=listing_fee,
+        transaction_fee_est=transaction_fee,
+        net_revenue_est=net_revenue,
+        status="open",
+    )
+
+    db = get_db()
+    db.sell_orders.insert_one(order.model_dump())
+
+    buoc_thanh_cong(
+        f"Đặt sell order {slot.full_name}",
+        gia_dat=listed_price,
+        listing_fee=listing_fee,
+        transaction_fee=transaction_fee,
+        net=net_revenue,
+    )
+    log.info(
+        "Đã đặt sell order: %s @ %s (%s) | net est=%s",
+        slot.full_name,
+        f"{listed_price:,}",
+        market_city,
+        f"{net_revenue:,}",
+    )
+    return order
+
+
+def _normalize(s: str) -> str:
+    return " ".join((s or "").lower().split())
+
+
+def _is_order_still_visible(order: dict, ocr_text: str) -> bool:
+    item = order.get("item", {})
+    full_name = _normalize(str(item.get("full_name", "")))
+    base_name = _normalize(str(item.get("base_name", "")))
+    text = _normalize(ocr_text)
+
+    if full_name and full_name in text:
+        return True
+    if base_name and base_name in text:
+        return True
+    return False
+
+
+def reconcile_filled_orders(cal: Calibration, backend: InputBackend) -> list[Transaction]:
+    """Poll My Orders and mark missing open orders as filled.
+
+    Returns transactions generated from newly-filled orders.
+    """
+    regions = cal.regions
+    my_orders_tab = _require_region(regions.my_orders_tab, "my_orders_tab")
+    my_orders_list = _require_region(regions.my_orders_list, "my_orders_list")
+
+    if is_disconnect_visible(regions.disconnect_icon):
+        wait_for_disconnect_clear(cal)
+
+    _center_click(backend, my_orders_tab)
+    _jitter_sleep(0.25, 0.45)
+
+    open_text = read_text(my_orders_list)
+    if not open_text.strip():
+        log.warning(
+            "Không OCR được nội dung My Orders — bỏ qua reconcile chu kỳ này để tránh false positive."
+        )
+        return []
+
+    db = get_db()
+    open_orders = list(db.sell_orders.find({"status": "open"}).sort("listed_at", 1))
+    if not open_orders:
+        return []
+
+    now = datetime.now(timezone.utc)
+    filled_txs: list[Transaction] = []
+    for order in open_orders:
+        if _is_order_still_visible(order, open_text):
+            continue
+
+        order_id = order.get("_id")
+        db.sell_orders.update_one(
+            {"_id": order_id},
+            {"$set": {"status": "filled", "filled_at": now}},
         )
 
-        # Kiểm tra mất kết nối trước mỗi thao tác
-        if is_disconnect_visible(regions.disconnect_icon):
-            wait_for_disconnect_clear(cal)
+        item = order.get("item", {})
+        listed_price = int(order.get("listed_price", 0) or 0)
+        listing_fee = int(order.get("listing_fee", 0) or 0)
+        transaction_fee = int(order.get("transaction_fee_est", 0) or 0)
+        net_revenue = int(order.get("net_revenue_est", 0) or 0)
 
-        # Kiểm tra nút bán có màu đỏ không (có lệnh mua phù hợp)
-        if not is_red_button(regions.sell_now_button):
-            log.info(
-                f"Ô {slot.slot}: lệnh mua thứ {attempt + 1} không có nút đỏ — bỏ qua vật phẩm này."
-            )
-            break
-
-        log.debug(f"Ô {slot.slot}: nút bán màu đỏ — đang đọc giá...")
-
-        # Đọc giá
-        price = None
-        for doc_lan in range(3):
-            price = read_price(regions.buy_order_price)
-            if price is not None:
-                break
-            log.debug(f"Ô {slot.slot}: OCR chưa đọc được giá (lần {doc_lan + 1}/3), chờ {_MARKET_LAG_WAIT}s...")
-            time.sleep(_MARKET_LAG_WAIT)
-
-        if price is None:
-            log.warning(
-                f"Ô {slot.slot}: không đọc được giá sau 3 lần thử — bỏ qua vật phẩm này."
-            )
-            break
-
-        log.debug(f"Ô {slot.slot}: giá đọc được = {price:,}, tối thiểu = {min_sell_price:,}")
-
-        if price < min_sell_price:
-            log.info(
-                f"Ô {slot.slot}: giá {price:,} thấp hơn tối thiểu {min_sell_price:,} — bỏ qua."
-            )
-            return None
-
-        # Nhấn nút bán
-        log.debug(f"Ô {slot.slot}: giá hợp lệ — đang nhấn nút bán...")
-        cap_nhat_buoc(f"Nhấn nút bán {slot.full_name}", gia=price, o=slot.slot)
-        r = regions.sell_now_button
-        backend.click(r.x + r.w // 2, r.y + r.h // 2)
-        _jitter_sleep(0.4, 0.8)
-
-        # Kiểm tra popup lỗi sau khi bán
-        if is_disconnect_visible(regions.disconnect_icon):
-            log.warning(f"Ô {slot.slot}: mất kết nối ngay sau khi nhấn bán — hủy giao dịch.")
-            wait_for_disconnect_clear(cal)
-            return None
-
-        city = read_market_city(cal)
         tx = Transaction(
-            session_id=session_id,
+            session_id=str(order.get("session_id", "")),
             item=TransactionItem(
-                full_name=slot.full_name,
-                tier=slot.tier,
-                enchant=slot.enchant,
+                base_name=item.get("base_name"),
+                full_name=str(item.get("full_name", "Unknown")),
+                tier=int(item.get("tier", 0) or 0),
+                enchant=int(item.get("enchant", 0) or 0),
             ),
-            quantity=1,
-            unit_price=price,
-            total_price=price,
-            market_city=city,
+            quantity=int(order.get("quantity", 1) or 1),
+            unit_price=listed_price,
+            total_price=listed_price,
+            market_city=str(order.get("market_city", "Unknown")),
+            status="filled",
+            order_type="sell_order",
+            listing_fee=listing_fee,
+            transaction_fee=transaction_fee,
+            net_revenue=net_revenue,
+            related_order_id=str(order_id) if isinstance(order_id, ObjectId) else None,
         )
-        buoc_thanh_cong(f"Bán {slot.full_name}", gia=price, thanh_pho=city)
-        log.info(f"Đã bán: {slot.full_name} @ {price:,} tại {city}")
-        return tx
+        filled_txs.append(tx)
 
-    log.debug(f"Ô {slot.slot}: không tìm được lệnh mua phù hợp sau {_MAX_ORDERS_TO_CHECK} lần kiểm tra.")
-    return None
+    return filled_txs

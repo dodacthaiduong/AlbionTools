@@ -21,7 +21,7 @@ export interface ItemConfig {
   tier: number;
   enchant: number;
   estimated_price: number | null;
-  min_sell_price: number | null;
+  cost_price: number | null;
   enabled: boolean;
   last_scanned_at: string;
 }

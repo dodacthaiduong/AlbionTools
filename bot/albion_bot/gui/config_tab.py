@@ -25,7 +25,7 @@ class _ItemRow:
         tier_str = f"T{tier}.{enchant}" if enchant else f"T{tier}"
         est = doc.get("estimated_price")
         est_str = f"{est:,}" if est is not None else "—"
-        min_price = doc.get("min_sell_price")
+        cost_price = doc.get("cost_price", doc.get("min_sell_price"))
 
         self.frame = ctk.CTkFrame(parent, fg_color="transparent")
 
@@ -43,13 +43,13 @@ class _ItemRow:
         self._est_label = ctk.CTkLabel(self.frame, text=est_str, anchor="e", width=90)
         self._est_label.grid(row=0, column=2, padx=(0, 8), pady=4, sticky="e")
 
-        # Min sell price entry
-        self._min_entry = ctk.CTkEntry(
-            self.frame, width=100, placeholder_text="min price"
+        # Cost price entry
+        self._cost_entry = ctk.CTkEntry(
+            self.frame, width=100, placeholder_text="cost price"
         )
-        if min_price is not None:
-            self._min_entry.insert(0, str(min_price))
-        self._min_entry.grid(row=0, column=3, padx=(0, 8), pady=4)
+        if cost_price is not None:
+            self._cost_entry.insert(0, str(cost_price))
+        self._cost_entry.grid(row=0, column=3, padx=(0, 8), pady=4)
 
         # Enabled switch
         self._enabled_var = ctk.BooleanVar(value=bool(doc.get("enabled", False)))
@@ -68,18 +68,18 @@ class _ItemRow:
         self._save_btn.grid(row=0, column=5, padx=(0, 4), pady=4)
 
     def _save(self) -> None:
-        raw = self._min_entry.get().strip()
-        min_price: int | None = None
+        raw = self._cost_entry.get().strip()
+        cost_price: int | None = None
         if raw:
             try:
-                min_price = int(raw)
+                cost_price = int(raw)
             except ValueError:
                 self._on_save(
                     False, f"Invalid price '{raw}' for {self._doc.get('full_name')}"
                 )
                 return
         enabled = self._enabled_var.get()
-        self._on_save(True, None, self._doc, min_price, enabled)
+        self._on_save(True, None, self._doc, cost_price, enabled)
 
     def matches(self, query: str) -> bool:
         """Return True if the item name contains *query* (case-insensitive)."""
@@ -93,7 +93,7 @@ class _ItemRow:
 
 
 class ConfigTab:
-    """Item config tab — edit min-sell prices and enabled state for each item."""
+    """Item config tab — edit cost prices and enabled state for each item."""
 
     def __init__(self, parent: ctk.CTkFrame) -> None:
         self._parent = parent
@@ -140,7 +140,7 @@ class ConfigTab:
                 ("Item Name", 220),
                 ("Tier", 50),
                 ("Est. Price", 90),
-                ("Min Sell Price", 100),
+                ("Cost Price", 100),
                 ("Enabled", 90),
                 ("", 60),
             ]
@@ -228,7 +228,7 @@ class ConfigTab:
         success: bool,
         error_msg: str | None,
         doc: dict[str, Any] | None = None,
-        min_price: int | None = None,
+        cost_price: int | None = None,
         enabled: bool = True,
     ) -> None:
         if not success:
@@ -241,17 +241,20 @@ class ConfigTab:
                 {"_id": doc["_id"]},
                 {
                     "$set": {
-                        "min_sell_price": min_price,
+                        "cost_price": cost_price,
                         "enabled": enabled,
-                    }
+                    },
+                    "$unset": {
+                        "min_sell_price": "",
+                    },
                 },
             )
             name = doc.get("full_name", "item")
             self._set_status(f"Saved '{name}'.")
             log.info(
-                "Saved item config for '%s': min_sell_price=%s, enabled=%s",
+                "Saved item config for '%s': cost_price=%s, enabled=%s",
                 name,
-                min_price,
+                cost_price,
                 enabled,
             )
         except Exception as exc:

@@ -33,8 +33,11 @@ def _human(key: str) -> str:
 
 # Region keys in display order
 _REGION_KEYS: list[str] = [
-    "sell_now_button",
-    "buy_order_price",
+    "lowest_sell_order_price",
+    "sell_order_price_input",
+    "sell_order_confirm_button",
+    "my_orders_tab",
+    "my_orders_list",
     "tooltip_item_name",
     "tooltip_est_price",
     "disconnect_icon",
